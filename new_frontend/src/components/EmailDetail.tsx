@@ -1,11 +1,11 @@
-import { Email } from '../types';
+import { Email, GmailLabel } from '../types';
 import { X, Star, Archive, Trash2, Reply, Forward, MoreVertical, Download } from 'lucide-react';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
-import { labels } from '../mockData';
 
 interface EmailDetailProps {
   email: Email;
+  gmailLabels: GmailLabel[];
   onClose: () => void;
   onDelete: (id: string) => void;
   onArchive: (id: string) => void;
@@ -15,12 +15,33 @@ interface EmailDetailProps {
 
 export default function EmailDetail({
   email,
+  gmailLabels,
   onClose,
   onDelete,
   onArchive,
   onToggleStar,
   onMarkAsRead,
 }: EmailDetailProps) {
+  // Helper to get label color class
+  const getLabelColorClass = (label: GmailLabel): string => {
+    if (!label.color?.backgroundColor) {
+      return 'bg-gray-200 text-gray-700';
+    }
+    
+    const colorMap: { [key: string]: string } = {
+      '#fb4c2f': 'bg-red-100 text-red-800',
+      '#ffad47': 'bg-orange-100 text-orange-800',
+      '#fad165': 'bg-yellow-100 text-yellow-800',
+      '#16a766': 'bg-green-100 text-green-800',
+      '#43d692': 'bg-green-100 text-green-700',
+      '#4a86e8': 'bg-blue-100 text-blue-800',
+      '#a479e2': 'bg-purple-100 text-purple-800',
+      '#f691b3': 'bg-pink-100 text-pink-800',
+    };
+
+    return colorMap[label.color.backgroundColor.toLowerCase()] || 'bg-gray-200 text-gray-700';
+  };
+  
   return (
     <div className="w-2/5 border-l border-gray-200 flex flex-col bg-white">
       {/* Header */}
@@ -79,22 +100,27 @@ export default function EmailDetail({
             {email.subject || '(No subject)'}
           </h2>
 
-          {email.labels.length > 0 && (
-            <div className="flex gap-2 mb-4">
-              {email.labels.map((labelId) => {
-                const label = labels.find(l => l.id === labelId);
-                if (!label) return null;
-                return (
+          {email.labels.length > 0 && (() => {
+            // Only show user-created labels
+            const userLabels = email.labels
+              .map(labelId => gmailLabels.find(l => l.id === labelId))
+              .filter(label => label && label.type === 'user');
+            
+            if (userLabels.length === 0) return null;
+            
+            return (
+              <div className="flex gap-2 mb-4 flex-wrap">
+                {userLabels.map((label) => (
                   <span
-                    key={labelId}
-                    className={`badge ${label.color}`}
+                    key={label!.id}
+                    className={`px-2 py-1 rounded text-sm ${getLabelColorClass(label!)}`}
                   >
-                    {label.name}
+                    {label!.name}
                   </span>
-                );
-              })}
-            </div>
-          )}
+                ))}
+              </div>
+            );
+          })()}
         </div>
 
         <div className="mb-6">

@@ -1,17 +1,25 @@
 import { useState, useEffect } from 'react';
-import { Email, EmailFolder, EmailLabel } from './types';
+import { Email, EmailFolder, GmailLabel } from './types';
 import { mockEmails } from './mockData';
 import Sidebar from './components/Sidebar';
 import EmailList from './components/EmailList';
 import EmailDetail from './components/EmailDetail';
 import ComposeEmail from './components/ComposeEmail';
 import Header from './components/Header';
-import { fetchGmailEmails, starEmail as gmailStarEmail, markAsRead as gmailMarkAsRead, deleteEmail as gmailDeleteEmail, sendEmail as gmailSendEmail } from './services/gmailService';
+import { 
+  fetchGmailEmails, 
+  fetchGmailLabels,
+  starEmail as gmailStarEmail, 
+  markAsRead as gmailMarkAsRead, 
+  deleteEmail as gmailDeleteEmail, 
+  sendEmail as gmailSendEmail 
+} from './services/gmailService';
 
 function App() {
   const [emails, setEmails] = useState<Email[]>(mockEmails);
+  const [gmailLabels, setGmailLabels] = useState<GmailLabel[]>([]);
   const [selectedFolder, setSelectedFolder] = useState<EmailFolder>('inbox');
-  const [selectedLabel, setSelectedLabel] = useState<EmailLabel | null>(null);
+  const [selectedLabel, setSelectedLabel] = useState<string | null>(null);
   const [selectedEmailId, setSelectedEmailId] = useState<string | null>(null);
   const [isComposing, setIsComposing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -19,21 +27,25 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [useRealData, setUseRealData] = useState(false);
 
-  // Load Gmail emails on mount
+  // Load Gmail emails and labels on mount
   useEffect(() => {
     if (useRealData) {
-      loadGmailEmails();
+      loadGmailData();
     }
   }, [useRealData]);
 
-  const loadGmailEmails = async () => {
+  const loadGmailData = async () => {
     setIsLoading(true);
     try {
-      const gmailEmails = await fetchGmailEmails(50);
+      const [gmailEmails, labelsData] = await Promise.all([
+        fetchGmailEmails(50),
+        fetchGmailLabels()
+      ]);
       setEmails(gmailEmails);
+      setGmailLabels(labelsData.labels);
     } catch (error) {
-      console.error('Failed to load Gmail emails:', error);
-      alert('Failed to load Gmail emails. Using mock data instead.');
+      console.error('Failed to load Gmail data:', error);
+      alert('Failed to load Gmail data. Using mock data instead.');
       setUseRealData(false);
     } finally {
       setIsLoading(false);
@@ -148,7 +160,7 @@ function App() {
         alert('Email sent successfully!');
         setIsComposing(false);
         // Reload emails to show sent email
-        await loadGmailEmails();
+        await loadGmailData();
       } catch (error) {
         console.error('Failed to send email:', error);
         alert('Failed to send email');
@@ -273,7 +285,7 @@ function App() {
           </button>
           {useRealData && (
             <button
-              onClick={loadGmailEmails}
+              onClick={loadGmailData}
               disabled={isLoading}
               className="px-3 py-1 bg-blue-600 text-white rounded-full text-sm hover:bg-blue-700 disabled:opacity-50"
             >
@@ -290,12 +302,13 @@ function App() {
         <Sidebar
           selectedFolder={selectedFolder}
           selectedLabel={selectedLabel}
+          gmailLabels={gmailLabels}
           onSelectFolder={(folder: EmailFolder) => {
             setSelectedFolder(folder);
             setSelectedLabel(null);
             setSelectedEmailId(null);
           }}
-          onSelectLabel={(label: EmailLabel | null) => {
+          onSelectLabel={(label: string | null) => {
             setSelectedLabel(label);
             setSelectedEmailId(null);
           }}
@@ -306,6 +319,7 @@ function App() {
           emails={filteredEmails}
           selectedEmailId={selectedEmailId}
           selectedEmails={selectedEmails}
+          gmailLabels={gmailLabels}
           onSelectEmail={setSelectedEmailId}
           onToggleStar={handleToggleStar}
           onToggleSelect={handleToggleSelect}
@@ -317,6 +331,7 @@ function App() {
         {selectedEmail && (
           <EmailDetail
             email={selectedEmail}
+            gmailLabels={gmailLabels}
             onClose={() => setSelectedEmailId(null)}
             onDelete={handleDeleteEmail}
             onArchive={handleArchiveEmail}
@@ -328,6 +343,7 @@ function App() {
 
       {isComposing && (
         <ComposeEmail
+          isOpen={isComposing}
           onClose={() => setIsComposing(false)}
           onSend={handleSendEmail}
           onSaveDraft={handleSaveDraft}

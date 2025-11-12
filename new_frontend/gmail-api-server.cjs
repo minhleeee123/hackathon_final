@@ -127,6 +127,30 @@ function getEmailSnippet(body) {
 
 // API Routes
 
+// Get all Gmail labels (system + user created)
+app.get('/api/labels', async (req, res) => {
+  try {
+    const auth = await authorize();
+    const gmail = google.gmail({ version: 'v1', auth });
+
+    const labelsRes = await gmail.users.labels.list({ userId: 'me' });
+    const allLabels = labelsRes.data.labels || [];
+
+    // Phân loại labels
+    const systemLabels = allLabels.filter(l => l.type === 'system');
+    const userLabels = allLabels.filter(l => l.type === 'user');
+
+    res.json({
+      labels: allLabels,
+      systemLabels: systemLabels,
+      userLabels: userLabels
+    });
+  } catch (error) {
+    console.error('Error fetching labels:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.get('/api/emails', async (req, res) => {
   try {
     const auth = await authorize();
@@ -153,7 +177,7 @@ app.get('/api/emails', async (req, res) => {
       const to = getHeader(headers, 'to');
       const subject = getHeader(headers, 'subject');
       const date = getHeader(headers, 'date');
-      const labels = msg.data.labelIds || [];
+      const labelIds = msg.data.labelIds || [];
 
       const body = getEmailBody(msg.data.payload);
       const snippet = getEmailSnippet(body);
@@ -169,13 +193,13 @@ app.get('/api/emails', async (req, res) => {
         body: body,
         snippet: snippet,
         date: new Date(date).toISOString(),
-        isRead: !labels.includes('UNREAD'),
-        isStarred: labels.includes('STARRED'),
-        labels: [],
+        isRead: !labelIds.includes('UNREAD'),
+        isStarred: labelIds.includes('STARRED'),
+        labels: labelIds, // ← Trả về TẤT CẢ labelIds từ Gmail
         hasAttachments: msg.data.payload.parts?.some(
           part => part.filename && part.filename.length > 0
         ) || false,
-        folder: mapGmailLabelToFolder(labels)
+        folder: mapGmailLabelToFolder(labelIds)
       };
 
       emails.push(email);
@@ -245,6 +269,95 @@ app.post('/api/emails/:id/delete', async (req, res) => {
     res.json({ success: true });
   } catch (error) {
     console.error('Error deleting email:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Add label to email
+app.post('/api/emails/:id/labels/add', async (req, res) => {
+  try {
+    const auth = await authorize();
+    const gmail = google.gmail({ version: 'v1', auth });
+    const { labelIds } = req.body;
+
+    await gmail.users.messages.modify({
+      userId: 'me',
+      id: req.params.id,
+      requestBody: {
+        addLabelIds: Array.isArray(labelIds) ? labelIds : [labelIds]
+      }
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error adding label:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Remove label from email
+app.post('/api/emails/:id/labels/remove', async (req, res) => {
+  try {
+    const auth = await authorize();
+    const gmail = google.gmail({ version: 'v1', auth });
+    const { labelIds } = req.body;
+
+    await gmail.users.messages.modify({
+      userId: 'me',
+      id: req.params.id,
+      requestBody: {
+        removeLabelIds: Array.isArray(labelIds) ? labelIds : [labelIds]
+      }
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error removing label:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Create new label
+app.post('/api/labels/create', async (req, res) => {
+  try {
+    const auth = await authorize();
+    const gmail = google.gmail({ version: 'v1', auth });
+    const { name, color } = req.body;
+
+    const newLabel = await gmail.users.labels.create({
+      userId: 'me',
+      requestBody: {
+        name: name,
+        labelListVisibility: 'labelShow',
+        messageListVisibility: 'show',
+        color: color || {
+          backgroundColor: '#42d692',
+          textColor: '#ffffff'
+        }
+      }
+    });
+
+    res.json({ success: true, label: newLabel.data });
+  } catch (error) {
+    console.error('Error creating label:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Delete label
+app.delete('/api/labels/:labelId', async (req, res) => {
+  try {
+    const auth = await authorize();
+    const gmail = google.gmail({ version: 'v1', auth });
+
+    await gmail.users.labels.delete({
+      userId: 'me',
+      id: req.params.labelId
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting label:', error);
     res.status(500).json({ error: error.message });
   }
 });

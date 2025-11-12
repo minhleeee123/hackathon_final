@@ -1,13 +1,13 @@
-import { Email } from '../types';
+import { Email, GmailLabel } from '../types';
 import { Star, Archive, Trash2, MoreVertical, RefreshCw } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
-import { labels } from '../mockData';
 
 interface EmailListProps {
   emails: Email[];
   selectedEmailId: string | null;
   selectedEmails: Set<string>;
+  gmailLabels: GmailLabel[];
   onSelectEmail: (id: string) => void;
   onToggleStar: (id: string) => void;
   onToggleSelect: (id: string) => void;
@@ -20,6 +20,7 @@ export default function EmailList({
   emails,
   selectedEmailId,
   selectedEmails,
+  gmailLabels,
   onSelectEmail,
   onToggleStar,
   onToggleSelect,
@@ -28,6 +29,26 @@ export default function EmailList({
   onBulkMarkAsRead,
 }: EmailListProps) {
   const hasSelection = selectedEmails.size > 0;
+
+  // Helper to get label color class
+  const getLabelColorClass = (label: GmailLabel): string => {
+    if (!label.color?.backgroundColor) {
+      return 'bg-gray-200 text-gray-700';
+    }
+    
+    const colorMap: { [key: string]: string } = {
+      '#fb4c2f': 'bg-red-100 text-red-800',
+      '#ffad47': 'bg-orange-100 text-orange-800',
+      '#fad165': 'bg-yellow-100 text-yellow-800',
+      '#16a766': 'bg-green-100 text-green-800',
+      '#43d692': 'bg-green-100 text-green-700',
+      '#4a86e8': 'bg-blue-100 text-blue-800',
+      '#a479e2': 'bg-purple-100 text-purple-800',
+      '#f691b3': 'bg-pink-100 text-pink-800',
+    };
+
+    return colorMap[label.color.backgroundColor.toLowerCase()] || 'bg-gray-200 text-gray-700';
+  };
 
   return (
     <div className="flex-1 flex flex-col bg-white overflow-hidden">
@@ -155,22 +176,30 @@ export default function EmailList({
                   {email.snippet}
                 </div>
 
-                {email.labels.length > 0 && (
-                  <div className="flex gap-1 mt-2">
-                    {email.labels.map((labelId) => {
-                      const label = labels.find(l => l.id === labelId);
-                      if (!label) return null;
-                      return (
+                {email.labels.length > 0 && (() => {
+                  // Only show user-created labels
+                  const userLabels = email.labels
+                    .map(labelId => gmailLabels.find(l => l.id === labelId))
+                    .filter(label => label && label.type === 'user');
+                  
+                  if (userLabels.length === 0) return null;
+                  
+                  return (
+                    <div className="flex gap-1 mt-2 flex-wrap">
+                      {userLabels.slice(0, 3).map((label) => (
                         <span
-                          key={labelId}
-                          className={`badge ${label.color} text-xs`}
+                          key={label!.id}
+                          className={`px-2 py-0.5 rounded text-xs ${getLabelColorClass(label!)}`}
                         >
-                          {label.name}
+                          {label!.name}
                         </span>
-                      );
-                    })}
-                  </div>
-                )}
+                      ))}
+                      {userLabels.length > 3 && (
+                        <span className="text-xs text-gray-500">+{userLabels.length - 3}</span>
+                      )}
+                    </div>
+                  );
+                })()}
               </div>
             </div>
           ))

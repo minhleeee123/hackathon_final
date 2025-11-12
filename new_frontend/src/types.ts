@@ -1,6 +1,17 @@
 export type EmailFolder = 'inbox' | 'starred' | 'sent' | 'drafts' | 'trash' | 'spam' | 'all';
 
-export type EmailLabel = 'work' | 'family' | 'friends' | 'important' | 'promotion' | 'social';
+// Gmail Label from API (can be system or user labels)
+export interface GmailLabel {
+  id: string;
+  name: string;
+  type: 'system' | 'user';
+  messageListVisibility?: string;
+  labelListVisibility?: string;
+  color?: {
+    textColor: string;
+    backgroundColor: string;
+  };
+}
 
 export interface Email {
   id: string;
@@ -18,7 +29,7 @@ export interface Email {
   date: Date;
   isRead: boolean;
   isStarred: boolean;
-  labels: EmailLabel[];
+  labels: string[]; // Array of Gmail label IDs
   hasAttachments: boolean;
   attachments?: Attachment[];
   folder: EmailFolder;
@@ -41,7 +52,8 @@ export interface FolderConfig {
 }
 
 export interface LabelConfig {
-  id: EmailLabel;
+  id: string;
   name: string;
   color: string;
+  type?: 'system' | 'user';
 }
