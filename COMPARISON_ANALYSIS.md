@@ -19,6 +19,7 @@
 | Hiển thị danh sách email | ✅ Mock data | ✅ Gmail API | Clone tốt hơn - real data |
 | Đọc chi tiết email | ✅ | ✅ | Tương đương |
 | Compose email | ✅ Mock | ✅ Gmail API | Clone tốt hơn - gửi thực |
+| Reply/Reply All/Forward | ✅ Mock | ✅ Gmail API | Clone tốt hơn - reply thực |
 | Star/Unstar email | ✅ Mock | ✅ Gmail API | Clone tốt hơn |
 | Mark as read/unread | ✅ Mock | ✅ Gmail API | Clone tốt hơn |
 | Delete email | ✅ Mock | ✅ Gmail API | Clone tốt hơn |

@@ -14,6 +14,7 @@ interface EmailDetailProps {
   onMarkAsRead: (id: string, isRead: boolean) => void;
   onAddLabel: (emailId: string, labelIds: string[]) => Promise<void>;
   onRemoveLabel: (emailId: string, labelIds: string[]) => Promise<void>;
+  onReply: (mode: 'reply' | 'replyAll' | 'forward') => void;
 }
 
 export default function EmailDetail({
@@ -26,6 +27,7 @@ export default function EmailDetail({
   onMarkAsRead,
   onAddLabel,
   onRemoveLabel,
+  onReply,
 }: EmailDetailProps) {
   // Helper to get label color class
   const getLabelColorClass = (label: GmailLabel): string => {
@@ -197,12 +199,25 @@ export default function EmailDetail({
 
         {/* Reply buttons */}
         <div className="mt-8 flex gap-2">
-          <button className="gmail-btn gmail-btn-primary">
-            <Reply className="w-4 h-4 mr-2 inline" />
+          <button 
+            onClick={() => onReply('reply')}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+          >
+            <Reply className="w-4 h-4" />
             Reply
           </button>
-          <button className="gmail-btn gmail-btn-secondary">
-            <Forward className="w-4 h-4 mr-2 inline" />
+          <button 
+            onClick={() => onReply('replyAll')}
+            className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
+          >
+            <Reply className="w-4 h-4" />
+            Reply All
+          </button>
+          <button 
+            onClick={() => onReply('forward')}
+            className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
+          >
+            <Forward className="w-4 h-4" />
             Forward
           </button>
         </div>

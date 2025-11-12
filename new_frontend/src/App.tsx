@@ -28,6 +28,13 @@ function App() {
   const [selectedEmailId, setSelectedEmailId] = useState<string | null>(null);
   const [isComposing, setIsComposing] = useState(false);
   const [isManagingLabels, setIsManagingLabels] = useState(false);
+  const [replyData, setReplyData] = useState<{
+    to: string[];
+    cc?: string[];
+    subject: string;
+    body: string;
+    mode: 'reply' | 'replyAll' | 'forward';
+  } | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedEmails, setSelectedEmails] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
@@ -361,6 +368,22 @@ function App() {
     }
   };
 
+  const handleReply = (mode: 'reply' | 'replyAll' | 'forward') => {
+    if (!selectedEmail) return;
+
+    const replyTo = mode === 'reply' ? [selectedEmail.from.email] : selectedEmail.to;
+    const replyCc = mode === 'replyAll' ? selectedEmail.cc : undefined;
+
+    setReplyData({
+      to: replyTo,
+      cc: replyCc,
+      subject: selectedEmail.subject,
+      body: selectedEmail.body,
+      mode
+    });
+    setIsComposing(true);
+  };
+
   const unreadCount = emails.filter(e => e.folder === 'inbox' && !e.isRead).length;
 
   return (
@@ -447,6 +470,7 @@ function App() {
             onMarkAsRead={handleMarkAsRead}
             onAddLabel={handleAddLabel}
             onRemoveLabel={handleRemoveLabel}
+            onReply={handleReply}
           />
         )}
       </div>
@@ -454,9 +478,13 @@ function App() {
       {isComposing && (
         <ComposeEmail
           isOpen={isComposing}
-          onClose={() => setIsComposing(false)}
+          onClose={() => {
+            setIsComposing(false);
+            setReplyData(null);
+          }}
           onSend={handleSendEmail}
           onSaveDraft={handleSaveDraft}
+          replyTo={replyData || undefined}
         />
       )}
 

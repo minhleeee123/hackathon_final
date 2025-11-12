@@ -20,6 +20,13 @@ interface ComposeEmailProps {
     subject: string;
     body: string;
   }) => void;
+  replyTo?: {
+    to: string[];
+    cc?: string[];
+    subject: string;
+    body: string;
+    mode: 'reply' | 'replyAll' | 'forward';
+  };
 }
 
 export default function ComposeEmail({
@@ -27,37 +34,56 @@ export default function ComposeEmail({
   onClose,
   onSend,
   onSaveDraft,
+  replyTo,
 }: ComposeEmailProps) {
-  const [to, setTo] = useState('');
-  const [cc, setCc] = useState('');
+  const [to, setTo] = useState(replyTo?.to.join(', ') || '');
+  const [cc, setCc] = useState(replyTo?.cc?.join(', ') || '');
   const [bcc, setBcc] = useState('');
-  const [subject, setSubject] = useState('');
+  const [subject, setSubject] = useState(
+    replyTo ? 
+      (replyTo.mode === 'forward' ? `Fwd: ${replyTo.subject}` : `Re: ${replyTo.subject}`) 
+      : ''
+  );
   const [body, setBody] = useState('');
-  const [showCc, setShowCc] = useState(false);
+  const [showCc, setShowCc] = useState(!!replyTo?.cc);
   const [showBcc, setShowBcc] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false);
 
+  // Quoted original message for reply context
+  const quotedMessage = replyTo ? 
+    `<br><br><div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #ccc;">
+      <p style="color: #666; margin-bottom: 10px;">--- Original Message ---</p>
+      ${replyTo.body}
+    </div>` 
+    : '';
+
   if (!isOpen) return null;
 
   const handleSend = () => {
+    // Combine user's reply with quoted original message
+    const finalBody = body + quotedMessage;
+    
     onSend({
       to: to.split(',').map(e => e.trim()).filter(Boolean),
       cc: cc ? cc.split(',').map(e => e.trim()).filter(Boolean) : undefined,
       bcc: bcc ? bcc.split(',').map(e => e.trim()).filter(Boolean) : undefined,
       subject,
-      body,
+      body: finalBody,
     });
     handleClose();
   };
 
   const handleSaveDraft = () => {
+    // Combine user's reply with quoted original message
+    const finalBody = body + quotedMessage;
+    
     onSaveDraft({
       to: to.split(',').map(e => e.trim()).filter(Boolean),
       cc: cc ? cc.split(',').map(e => e.trim()).filter(Boolean) : undefined,
       bcc: bcc ? bcc.split(',').map(e => e.trim()).filter(Boolean) : undefined,
       subject,
-      body,
+      body: finalBody,
     });
     handleClose();
   };
