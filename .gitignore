@@ -48,6 +48,9 @@ coverage/
 *.egg-info
 .eggs/
 .pytest_cache/
+
+# Gmail API tokens
+token.json
 .tox/
 .coverage
 htmlcov/
