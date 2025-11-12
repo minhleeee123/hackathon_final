@@ -1,0 +1,124 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #dadce0;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #bdc1c6;
+}
+
+/* Gmail-like hover effects */
+.email-item:hover {
+  box-shadow: inset 1px 0 0 #dadce0, inset -1px 0 0 #dadce0, 0 1px 2px 0 rgba(60,64,67,.3), 0 1px 3px 1px rgba(60,64,67,.15);
+  z-index: 1;
+}
+
+.email-item.selected {
+  background-color: #c2e7ff;
+}
+
+.email-item.unread {
+  font-weight: 700;
+}
+
+/* Quill editor customization */
+.ql-container {
+  font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
+  font-size: 14px;
+}
+
+.ql-editor {
+  min-height: 300px;
+}
+
+/* Gmail checkbox */
+.gmail-checkbox {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #5f6368;
+  border-radius: 2px;
+  cursor: pointer;
+  position: relative;
+}
+
+.gmail-checkbox:checked {
+  background-color: #1a73e8;
+  border-color: #1a73e8;
+}
+
+.gmail-checkbox:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+/* Gmail button */
+.gmail-btn {
+  @apply px-6 py-2 rounded-full font-medium transition-all;
+}
+
+.gmail-btn-primary {
+  @apply bg-blue-600 text-white hover:bg-blue-700 shadow-md;
+}
+
+.gmail-btn-secondary {
+  @apply bg-gray-100 text-gray-700 hover:bg-gray-200;
+}
+
+/* Badge */
+.badge {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+}
+
+.badge-work {
+  @apply bg-blue-100 text-blue-800;
+}
+
+.badge-family {
+  @apply bg-pink-100 text-pink-800;
+}
+
+.badge-friends {
+  @apply bg-green-100 text-green-800;
+}
+
+.badge-important {
+  @apply bg-red-100 text-red-800;
+}
+
+.badge-promotion {
+  @apply bg-purple-100 text-purple-800;
+}

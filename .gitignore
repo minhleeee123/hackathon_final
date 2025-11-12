@@ -49,8 +49,18 @@ coverage/
 .eggs/
 .pytest_cache/
 
-# Gmail API tokens
+# Gmail API credentials and tokens
 token.json
+credentials.json
+client_secret*.json
+**/token.json
+**/credentials.json
+**/client_secret*.json
+test/token.json
+test/client_secret*.json
+new_frontend/token.json
+new_frontend/credentials.json
+
 .tox/
 .coverage
 htmlcov/
