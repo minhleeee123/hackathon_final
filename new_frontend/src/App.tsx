@@ -172,6 +172,7 @@ function App() {
         await gmailSendEmail(emailData.to, emailData.subject, emailData.body);
         alert('Email sent successfully!');
         setIsComposing(false);
+        setReplyData(null);
         // Reload emails to show sent email
         await loadGmailData();
       } catch (error) {
@@ -230,6 +231,20 @@ function App() {
 
     setEmails(prev => [draftEmail, ...prev]);
     setIsComposing(false);
+  };
+
+  const handleSendReply = async (to: string[], _cc: string[] | undefined, subject: string, body: string) => {
+    if (useRealData) {
+      try {
+        await gmailSendEmail(to, subject, body);
+        alert('Reply sent successfully!');
+        // Reload emails to show sent reply
+        await loadGmailData();
+      } catch (error) {
+        console.error('Failed to send reply:', error);
+        alert('Failed to send reply');
+      }
+    }
   };
 
   const handleToggleSelect = (emailId: string) => {
@@ -368,22 +383,6 @@ function App() {
     }
   };
 
-  const handleReply = (mode: 'reply' | 'replyAll' | 'forward') => {
-    if (!selectedEmail) return;
-
-    const replyTo = mode === 'reply' ? [selectedEmail.from.email] : selectedEmail.to;
-    const replyCc = mode === 'replyAll' ? selectedEmail.cc : undefined;
-
-    setReplyData({
-      to: replyTo,
-      cc: replyCc,
-      subject: selectedEmail.subject,
-      body: selectedEmail.body,
-      mode
-    });
-    setIsComposing(true);
-  };
-
   const unreadCount = emails.filter(e => e.folder === 'inbox' && !e.isRead).length;
 
   return (
@@ -470,7 +469,7 @@ function App() {
             onMarkAsRead={handleMarkAsRead}
             onAddLabel={handleAddLabel}
             onRemoveLabel={handleRemoveLabel}
-            onReply={handleReply}
+            onSendReply={handleSendReply}
           />
         )}
       </div>

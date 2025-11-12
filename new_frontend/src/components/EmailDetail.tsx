@@ -1,8 +1,11 @@
+import { useState } from 'react';
 import { Email, GmailLabel } from '../types';
 import { X, Star, Archive, Trash2, Reply, Forward, MoreVertical, Download } from 'lucide-react';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import EmailLabelMenu from './EmailLabelMenu';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 interface EmailDetailProps {
   email: Email;
@@ -14,7 +17,7 @@ interface EmailDetailProps {
   onMarkAsRead: (id: string, isRead: boolean) => void;
   onAddLabel: (emailId: string, labelIds: string[]) => Promise<void>;
   onRemoveLabel: (emailId: string, labelIds: string[]) => Promise<void>;
-  onReply: (mode: 'reply' | 'replyAll' | 'forward') => void;
+  onSendReply: (to: string[], cc: string[] | undefined, subject: string, body: string) => Promise<void>;
 }
 
 export default function EmailDetail({
@@ -27,8 +30,57 @@ export default function EmailDetail({
   onMarkAsRead,
   onAddLabel,
   onRemoveLabel,
-  onReply,
+  onSendReply,
 }: EmailDetailProps) {
+  const [isReplying, setIsReplying] = useState(false);
+  const [replyMode, setReplyMode] = useState<'reply' | 'replyAll' | 'forward'>('reply');
+  const [replyBody, setReplyBody] = useState('');
+  const [isSending, setIsSending] = useState(false);
+
+  const handleStartReply = (mode: 'reply' | 'replyAll' | 'forward') => {
+    setReplyMode(mode);
+    setIsReplying(true);
+    setReplyBody('');
+  };
+
+  const handleSendReply = async () => {
+    if (!replyBody.trim()) return;
+
+    setIsSending(true);
+    try {
+      const to = replyMode === 'reply' ? [email.from.email] : email.to;
+      const cc = replyMode === 'replyAll' ? email.cc : undefined;
+      
+      // Always use "Re: " prefix for replies (not "Fwd:")
+      const subject = email.subject.startsWith('Re: ') ? email.subject : `Re: ${email.subject}`;
+      
+      // Add quoted original message (Gmail style - simple blockquote)
+      const quotedMessage = `<br><br><blockquote style="margin: 0 0 0 0.8ex; border-left: 1px solid #ccc; padding-left: 1ex;">
+${email.body}
+</blockquote>`;
+      
+      const fullBody = replyBody + quotedMessage;
+      
+      await onSendReply(to, cc, subject, fullBody);
+      
+      setIsReplying(false);
+      setReplyBody('');
+    } catch (error) {
+      console.error('Failed to send reply:', error);
+      alert('Failed to send reply');
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const modules = {
+    toolbar: [
+      ['bold', 'italic', 'underline'],
+      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+      ['link'],
+    ]
+  };
+
   // Helper to get label color class
   const getLabelColorClass = (label: GmailLabel): string => {
     if (!label.color?.backgroundColor) {
@@ -200,27 +252,65 @@ export default function EmailDetail({
         {/* Reply buttons */}
         <div className="mt-8 flex gap-2">
           <button 
-            onClick={() => onReply('reply')}
+            onClick={() => handleStartReply('reply')}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
           >
             <Reply className="w-4 h-4" />
             Reply
           </button>
           <button 
-            onClick={() => onReply('replyAll')}
+            onClick={() => handleStartReply('replyAll')}
             className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
           >
             <Reply className="w-4 h-4" />
             Reply All
           </button>
           <button 
-            onClick={() => onReply('forward')}
+            onClick={() => handleStartReply('forward')}
             className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
           >
             <Forward className="w-4 h-4" />
             Forward
           </button>
         </div>
+
+        {/* Inline Reply Form */}
+        {isReplying && (
+          <div className="mt-4 border border-gray-300 rounded-lg p-4 bg-gray-50">
+            <div className="mb-3 text-sm text-gray-700">
+              <div><strong>To:</strong> {replyMode === 'reply' ? email.from.email : email.to.join(', ')}</div>
+              {replyMode === 'replyAll' && email.cc && email.cc.length > 0 && (
+                <div><strong>Cc:</strong> {email.cc.join(', ')}</div>
+              )}
+            </div>
+            
+            <ReactQuill 
+              value={replyBody} 
+              onChange={setReplyBody}
+              modules={modules}
+              placeholder="Type your reply..."
+              className="bg-white rounded mb-3"
+              style={{ minHeight: '150px' }}
+            />
+            
+            <div className="flex gap-2 mt-3">
+              <button
+                onClick={handleSendReply}
+                disabled={isSending || !replyBody.trim()}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {isSending ? 'Sending...' : 'Send'}
+              </button>
+              <button
+                onClick={() => setIsReplying(false)}
+                disabled={isSending}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 disabled:opacity-50 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
