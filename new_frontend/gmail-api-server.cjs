@@ -368,9 +368,13 @@ app.post('/api/emails/send', async (req, res) => {
     const gmail = google.gmail({ version: 'v1', auth });
     const { to, subject, body } = req.body;
 
+    // Encode subject properly for UTF-8 (Vietnamese, special chars)
+    const utf8Subject = Buffer.from(subject, 'utf-8').toString('utf-8');
+    
     const message = [
       `To: ${to.join(', ')}`,
-      `Subject: ${subject}`,
+      `Subject: =?UTF-8?B?${Buffer.from(utf8Subject).toString('base64')}?=`,
+      'MIME-Version: 1.0',
       'Content-Type: text/html; charset=utf-8',
       '',
       body

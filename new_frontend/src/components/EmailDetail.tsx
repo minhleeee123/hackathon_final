@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Email, GmailLabel } from '../types';
 import { X, Star, Archive, Trash2, Reply, Forward, MoreVertical, Download } from 'lucide-react';
 import { format } from 'date-fns';
@@ -36,12 +36,22 @@ export default function EmailDetail({
   const [replyMode, setReplyMode] = useState<'reply' | 'replyAll' | 'forward'>('reply');
   const [replyBody, setReplyBody] = useState('');
   const [isSending, setIsSending] = useState(false);
+  const replyFormRef = useRef<HTMLDivElement>(null);
 
   const handleStartReply = (mode: 'reply' | 'replyAll' | 'forward') => {
     setReplyMode(mode);
     setIsReplying(true);
     setReplyBody('');
   };
+
+  // Auto-scroll to reply form when it opens
+  useEffect(() => {
+    if (isReplying && replyFormRef.current) {
+      setTimeout(() => {
+        replyFormRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+  }, [isReplying]);
 
   const handleSendReply = async () => {
     if (!replyBody.trim()) return;
@@ -259,13 +269,6 @@ ${email.body}
             Reply
           </button>
           <button 
-            onClick={() => handleStartReply('replyAll')}
-            className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
-          >
-            <Reply className="w-4 h-4" />
-            Reply All
-          </button>
-          <button 
             onClick={() => handleStartReply('forward')}
             className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center gap-2"
           >
@@ -276,7 +279,7 @@ ${email.body}
 
         {/* Inline Reply Form */}
         {isReplying && (
-          <div className="mt-4 border border-gray-300 rounded-lg p-4 bg-gray-50">
+          <div ref={replyFormRef} className="mt-4 border border-gray-300 rounded-lg p-4 bg-gray-50">
             <div className="mb-3 text-sm text-gray-700">
               <div><strong>To:</strong> {replyMode === 'reply' ? email.from.email : email.to.join(', ')}</div>
               {replyMode === 'replyAll' && email.cc && email.cc.length > 0 && (
