@@ -2,6 +2,7 @@ import { Email, GmailLabel } from '../types';
 import { X, Star, Archive, Trash2, Reply, Forward, MoreVertical, Download } from 'lucide-react';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
+import EmailLabelMenu from './EmailLabelMenu';
 
 interface EmailDetailProps {
   email: Email;
@@ -11,6 +12,8 @@ interface EmailDetailProps {
   onArchive: (id: string) => void;
   onToggleStar: (id: string) => void;
   onMarkAsRead: (id: string, isRead: boolean) => void;
+  onAddLabel: (emailId: string, labelIds: string[]) => Promise<void>;
+  onRemoveLabel: (emailId: string, labelIds: string[]) => Promise<void>;
 }
 
 export default function EmailDetail({
@@ -21,6 +24,8 @@ export default function EmailDetail({
   onArchive,
   onToggleStar,
   onMarkAsRead,
+  onAddLabel,
+  onRemoveLabel,
 }: EmailDetailProps) {
   // Helper to get label color class
   const getLabelColorClass = (label: GmailLabel): string => {
@@ -76,6 +81,14 @@ export default function EmailDetail({
         >
           <MoreVertical className="w-5 h-5 text-gray-600" />
         </button>
+
+        <EmailLabelMenu
+          emailId={email.id}
+          currentLabels={email.labels}
+          gmailLabels={gmailLabels}
+          onAddLabel={onAddLabel}
+          onRemoveLabel={onRemoveLabel}
+        />
 
         <div className="flex-1" />
 

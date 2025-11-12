@@ -7,7 +7,8 @@ import {
   Trash2, 
   MoreHorizontal,
   Edit,
-  Tag
+  Tag,
+  Settings
 } from 'lucide-react';
 import { EmailFolder, GmailLabel } from '../types';
 import { folders } from '../mockData';
@@ -18,10 +19,11 @@ interface SidebarProps {
   gmailLabels: GmailLabel[];
   onSelectFolder: (folder: EmailFolder) => void;
   onSelectLabel: (label: string | null) => void;
+  onManageLabels: () => void;
   unreadCount: number;
 }
 
-export default function Sidebar({ selectedFolder, selectedLabel, gmailLabels, onSelectFolder, onSelectLabel, unreadCount }: SidebarProps) {
+export default function Sidebar({ selectedFolder, selectedLabel, gmailLabels, onSelectFolder, onSelectLabel, onManageLabels, unreadCount }: SidebarProps) {
   const getIconComponent = (iconName: string) => {
     const iconMap: { [key: string]: any } = {
       Inbox,
@@ -155,14 +157,23 @@ export default function Sidebar({ selectedFolder, selectedLabel, gmailLabels, on
 
         <div className="my-2 border-t border-gray-200" />
 
-        <div className="px-4 py-2 text-xs font-medium text-gray-500 flex items-center gap-2">
-          <Tag className="w-3 h-3" />
-          Labels
+        <div className="px-4 py-2 flex items-center justify-between">
+          <div className="text-xs font-medium text-gray-500 flex items-center gap-2">
+            <Tag className="w-3 h-3" />
+            Labels
+          </div>
+          <button
+            onClick={onManageLabels}
+            className="p-1 hover:bg-gray-100 rounded transition-colors"
+            title="Quản lý labels"
+          >
+            <Settings className="w-3.5 h-3.5 text-gray-600" />
+          </button>
         </div>
 
         {userLabels.length === 0 ? (
           <div className="px-4 py-2 text-xs text-gray-400 italic">
-            No custom labels yet
+            Chưa có label tự tạo
           </div>
         ) : (
           userLabels.map((label) => (

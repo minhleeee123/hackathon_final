@@ -5,6 +5,7 @@ import Sidebar from './components/Sidebar';
 import EmailList from './components/EmailList';
 import EmailDetail from './components/EmailDetail';
 import ComposeEmail from './components/ComposeEmail';
+import LabelManager from './components/LabelManager';
 import Header from './components/Header';
 import { 
   fetchGmailEmails, 
@@ -12,7 +13,11 @@ import {
   starEmail as gmailStarEmail, 
   markAsRead as gmailMarkAsRead, 
   deleteEmail as gmailDeleteEmail, 
-  sendEmail as gmailSendEmail 
+  sendEmail as gmailSendEmail,
+  addLabelToEmail as gmailAddLabel,
+  removeLabelFromEmail as gmailRemoveLabel,
+  createLabel as gmailCreateLabel,
+  deleteLabel as gmailDeleteLabel
 } from './services/gmailService';
 
 function App() {
@@ -22,6 +27,7 @@ function App() {
   const [selectedLabel, setSelectedLabel] = useState<string | null>(null);
   const [selectedEmailId, setSelectedEmailId] = useState<string | null>(null);
   const [isComposing, setIsComposing] = useState(false);
+  const [isManagingLabels, setIsManagingLabels] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedEmails, setSelectedEmails] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
@@ -254,6 +260,107 @@ function App() {
     setSelectedEmails(new Set());
   };
 
+  // Label management functions
+  const handleAddLabel = async (emailId: string, labelIds: string[]) => {
+    if (!useRealData) return;
+
+    // Optimistic update
+    setEmails(prev => prev.map(email => {
+      if (email.id === emailId) {
+        const newLabels = [...new Set([...email.labels, ...labelIds])];
+        return { ...email, labels: newLabels };
+      }
+      return email;
+    }));
+
+    try {
+      await gmailAddLabel(emailId, labelIds);
+    } catch (error) {
+      console.error('Failed to add label:', error);
+      // Revert on error
+      setEmails(prev => prev.map(email => {
+        if (email.id === emailId) {
+          const newLabels = email.labels.filter(id => !labelIds.includes(id));
+          return { ...email, labels: newLabels };
+        }
+        return email;
+      }));
+      throw error;
+    }
+  };
+
+  const handleRemoveLabel = async (emailId: string, labelIds: string[]) => {
+    if (!useRealData) return;
+
+    // Optimistic update
+    setEmails(prev => prev.map(email => {
+      if (email.id === emailId) {
+        const newLabels = email.labels.filter(id => !labelIds.includes(id));
+        return { ...email, labels: newLabels };
+      }
+      return email;
+    }));
+
+    try {
+      await gmailRemoveLabel(emailId, labelIds);
+    } catch (error) {
+      console.error('Failed to remove label:', error);
+      // Revert on error
+      setEmails(prev => prev.map(email => {
+        if (email.id === emailId) {
+          const newLabels = [...new Set([...email.labels, ...labelIds])];
+          return { ...email, labels: newLabels };
+        }
+        return email;
+      }));
+      throw error;
+    }
+  };
+
+  const handleCreateLabel = async (name: string, backgroundColor?: string) => {
+    if (!useRealData) return;
+
+    try {
+      const color = backgroundColor ? {
+        backgroundColor,
+        textColor: '#ffffff'
+      } : undefined;
+      
+      const newLabel = await gmailCreateLabel(name, color);
+      console.log('New label created:', newLabel);
+      
+      // Reload labels from Gmail to ensure sync
+      const labelsData = await fetchGmailLabels();
+      setGmailLabels(labelsData.labels);
+      console.log('Labels reloaded from Gmail, count:', labelsData.labels.length);
+    } catch (error) {
+      console.error('Failed to create label:', error);
+      throw error;
+    }
+  };
+
+  const handleDeleteLabel = async (labelId: string) => {
+    if (!useRealData) return;
+
+    try {
+      await gmailDeleteLabel(labelId);
+      
+      // Reload labels from Gmail to ensure sync
+      const labelsData = await fetchGmailLabels();
+      setGmailLabels(labelsData.labels);
+      
+      // Remove label from all emails
+      setEmails(prev => prev.map(email => ({
+        ...email,
+        labels: email.labels.filter(id => id !== labelId)
+      })));
+      console.log('Label deleted and labels reloaded from Gmail');
+    } catch (error) {
+      console.error('Failed to delete label:', error);
+      throw error;
+    }
+  };
+
   const unreadCount = emails.filter(e => e.folder === 'inbox' && !e.isRead).length;
 
   return (
@@ -312,6 +419,7 @@ function App() {
             setSelectedLabel(label);
             setSelectedEmailId(null);
           }}
+          onManageLabels={() => setIsManagingLabels(true)}
           unreadCount={unreadCount}
         />
 
@@ -337,6 +445,8 @@ function App() {
             onArchive={handleArchiveEmail}
             onToggleStar={handleToggleStar}
             onMarkAsRead={handleMarkAsRead}
+            onAddLabel={handleAddLabel}
+            onRemoveLabel={handleRemoveLabel}
           />
         )}
       </div>
@@ -347,6 +457,16 @@ function App() {
           onClose={() => setIsComposing(false)}
           onSend={handleSendEmail}
           onSaveDraft={handleSaveDraft}
+        />
+      )}
+
+      {isManagingLabels && (
+        <LabelManager
+          isOpen={isManagingLabels}
+          onClose={() => setIsManagingLabels(false)}
+          gmailLabels={gmailLabels}
+          onCreateLabel={handleCreateLabel}
+          onDeleteLabel={handleDeleteLabel}
         />
       )}
     </div>
