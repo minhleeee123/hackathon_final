@@ -57,3 +57,20 @@ export interface LabelConfig {
   color: string;
   type?: 'system' | 'user';
 }
+
+export type TaskStatus = 'to-do' | 'in-process' | 'completed';
+export type TaskSource = 'ai' | 'user';
+
+export interface Task {
+  id: string;
+  title: string;
+  description: string;
+  deadline?: string;
+  location?: string;
+  relatedPeople?: string[];
+  items?: string[];
+  status: TaskStatus;
+  source: TaskSource;
+  emailId?: string;
+  createdAt: string;
+}

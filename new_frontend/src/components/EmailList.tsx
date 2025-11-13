@@ -1,5 +1,5 @@
 import { Email, GmailLabel } from '../types';
-import { Star, Archive, Trash2, MoreVertical, RefreshCw, Sparkles } from 'lucide-react';
+import { Star, Archive, Trash2, MoreVertical, RefreshCw, Sparkles, ListTodo } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
 
@@ -15,8 +15,11 @@ interface EmailListProps {
   onBulkDelete: () => void;
   onBulkMarkAsRead: (isRead: boolean) => void;
   onBulkClassify?: () => void;
+  onBulkExtractTasks?: () => void;
   isClassifying?: boolean;
+  isExtractingTasks?: boolean;
   classificationProgress?: { current: number; total: number };
+  taskExtractionProgress?: { current: number; total: number };
 }
 
 export default function EmailList({
@@ -31,8 +34,11 @@ export default function EmailList({
   onBulkDelete,
   onBulkMarkAsRead,
   onBulkClassify,
+  onBulkExtractTasks,
   isClassifying = false,
+  isExtractingTasks = false,
   classificationProgress = { current: 0, total: 0 },
+  taskExtractionProgress = { current: 0, total: 0 },
 }: EmailListProps) {
   const hasSelection = selectedEmails.size > 0;
 
@@ -131,7 +137,7 @@ export default function EmailList({
               <>
                 <button
                   onClick={onBulkClassify}
-                  disabled={isClassifying}
+                  disabled={isClassifying || isExtractingTasks}
                   className={`px-3 py-1.5 rounded transition-colors flex items-center gap-1.5 text-sm font-medium ${
                     isClassifying 
                       ? 'bg-blue-400 text-white cursor-not-allowed' 
@@ -153,6 +159,37 @@ export default function EmailList({
                     </div>
                     <span className="text-xs text-gray-600">
                       {classificationProgress.current}/{classificationProgress.total}
+                    </span>
+                  </div>
+                )}
+              </>
+            )}
+            {onBulkExtractTasks && (
+              <>
+                <button
+                  onClick={onBulkExtractTasks}
+                  disabled={isExtractingTasks || isClassifying}
+                  className={`px-3 py-1.5 rounded transition-colors flex items-center gap-1.5 text-sm font-medium ${
+                    isExtractingTasks 
+                      ? 'bg-green-400 text-white cursor-not-allowed' 
+                      : 'bg-green-600 text-white hover:bg-green-700'
+                  }`}
+                  title="Trích xuất task từ email bằng AI"
+                >
+                  <ListTodo className={`w-4 h-4 ${isExtractingTasks ? 'animate-spin' : ''}`} />
+                  {isExtractingTasks ? 'Đang trích xuất...' : 'Trích xuất Task'}
+                </button>
+                
+                {isExtractingTasks && taskExtractionProgress.total > 0 && (
+                  <div className="flex items-center gap-2 ml-2">
+                    <div className="w-32 bg-gray-200 rounded-full h-2">
+                      <div
+                        className="bg-green-600 h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${(taskExtractionProgress.current / taskExtractionProgress.total) * 100}%` }}
+                      />
+                    </div>
+                    <span className="text-xs text-gray-600">
+                      {taskExtractionProgress.current}/{taskExtractionProgress.total}
                     </span>
                   </div>
                 )}

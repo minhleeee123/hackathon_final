@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Email, EmailFolder, GmailLabel } from './types';
+import { Email, EmailFolder, GmailLabel, Task, TaskStatus } from './types';
 import { mockEmails } from './mockData';
 import Sidebar from './components/Sidebar';
 import EmailList from './components/EmailList';
@@ -7,6 +7,7 @@ import EmailDetail from './components/EmailDetail';
 import ComposeEmail from './components/ComposeEmail';
 import LabelManager from './components/LabelManager';
 import Header from './components/Header';
+import TaskManagementPage from './components/TaskManagementPage';
 import { 
   fetchGmailEmails, 
   fetchGmailLabels,
@@ -21,6 +22,7 @@ import {
   initializeAILabels
 } from './services/gmailService';
 import { BulkClassificationResult, TASK_LABEL, classifyEmailsBulk } from './services/aiService';
+import { extractTasksBulk, TaskExtractionResult } from './services/taskExtractorService';
 
 function App() {
   const [emails, setEmails] = useState<Email[]>(mockEmails);
@@ -44,6 +46,12 @@ function App() {
   const [isClassifying, setIsClassifying] = useState(false);
   const [classificationProgress, setClassificationProgress] = useState({ current: 0, total: 0 });
   const [aiLabelsInitialized, setAiLabelsInitialized] = useState(false);
+  
+  // Task Management state
+  const [currentTab, setCurrentTab] = useState<'emails' | 'tasks'>('emails');
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [isExtractingTasks, setIsExtractingTasks] = useState(false);
+  const [taskExtractionProgress, setTaskExtractionProgress] = useState({ current: 0, total: 0 });
 
   // Load Gmail emails and labels on mount
   useEffect(() => {
@@ -333,6 +341,104 @@ function App() {
     }
   };
 
+  // Task Extraction handlers
+  const handleBulkExtractTasks = async () => {
+    setIsExtractingTasks(true);
+    setTaskExtractionProgress({ current: 0, total: selectedEmails.size });
+
+    try {
+      const emailsToExtract = Array.from(selectedEmails)
+        .map(id => emails.find(e => e.id === id)!)
+        .filter(Boolean);
+
+      const results = await extractTasksBulk(
+        emailsToExtract,
+        (current, total) => {
+          setTaskExtractionProgress({ current, total });
+        }
+      );
+
+      await handleTaskExtractionComplete(results);
+      
+      // Switch to Tasks tab to show extracted tasks
+      setCurrentTab('tasks');
+    } catch (error) {
+      console.error('Task extraction failed:', error);
+    } finally {
+      setIsExtractingTasks(false);
+      setTaskExtractionProgress({ current: 0, total: 0 });
+    }
+  };
+
+  const handleTaskExtractionComplete = async (resultsMap: Map<string, TaskExtractionResult>) => {
+    try {
+      const newTasks: Task[] = [];
+      const emailIdsWithTasks: string[] = [];
+
+      for (const [emailId, result] of resultsMap.entries()) {
+        if (result.hasTask && result.tasks.length > 0) {
+          // Add tasks with metadata
+          result.tasks.forEach(task => {
+            newTasks.push({
+              ...task,
+              id: `task_${Date.now()}_${Math.random()}`,
+              status: 'to-do' as TaskStatus,
+              source: 'ai',
+              emailId: emailId,
+              createdAt: new Date().toISOString()
+            });
+          });
+          
+          emailIdsWithTasks.push(emailId);
+        }
+      }
+
+      // Add new tasks to state
+      setTasks(prev => [...prev, ...newTasks]);
+
+      // Apply task label to emails with extracted tasks
+      if (emailIdsWithTasks.length > 0 && useRealData) {
+        const taskLabelId = gmailLabels.find(l => l.name === TASK_LABEL)?.id;
+        if (taskLabelId) {
+          for (const emailId of emailIdsWithTasks) {
+            await handleAddLabel(emailId, [taskLabelId]);
+          }
+        }
+      }
+
+      // Clear selection and reload
+      setSelectedEmails(new Set());
+      if (useRealData) {
+        await loadGmailData();
+      }
+      
+      alert(`✅ Trích xuất thành công ${newTasks.length} task từ ${emailIdsWithTasks.length} email!`);
+    } catch (error) {
+      console.error('Failed to save extracted tasks:', error);
+    }
+  };
+
+  // Task Management handlers
+  const handleUpdateTask = (updatedTask: Task) => {
+    setTasks(prev => prev.map(task => 
+      task.id === updatedTask.id ? updatedTask : task
+    ));
+  };
+
+  const handleDeleteTask = (taskId: string) => {
+    setTasks(prev => prev.filter(task => task.id !== taskId));
+  };
+
+  const handleCreateTask = (taskData: Omit<Task, 'id' | 'createdAt' | 'source'>) => {
+    const newTask: Task = {
+      ...taskData,
+      id: `task_${Date.now()}`,
+      source: 'user',
+      createdAt: new Date().toISOString()
+    };
+    setTasks(prev => [newTask, ...prev]);
+  };
+
   const handleClassificationComplete = async (results: BulkClassificationResult[]) => {
     try {
       // Helper to find label ID by name
@@ -541,56 +647,101 @@ function App() {
           )}
         </div>
         <span className="text-xs text-gray-500">
-          {emails.length} emails loaded
+          {emails.length} emails | {tasks.length} tasks
         </span>
+      </div>
+
+      {/* Tab Navigation */}
+      <div className="border-b border-gray-200 bg-white">
+        <div className="flex gap-6 px-6">
+          <button
+            onClick={() => setCurrentTab('emails')}
+            className={`py-3 px-4 font-medium transition-colors border-b-2 ${
+              currentTab === 'emails'
+                ? 'text-blue-600 border-blue-600'
+                : 'text-gray-600 border-transparent hover:text-gray-900'
+            }`}
+          >
+            📧 Emails
+          </button>
+          <button
+            onClick={() => setCurrentTab('tasks')}
+            className={`py-3 px-4 font-medium transition-colors border-b-2 flex items-center gap-2 ${
+              currentTab === 'tasks'
+                ? 'text-blue-600 border-blue-600'
+                : 'text-gray-600 border-transparent hover:text-gray-900'
+            }`}
+          >
+            ✅ Tasks
+            {tasks.length > 0 && (
+              <span className="bg-blue-600 text-white px-2 py-0.5 rounded-full text-xs">
+                {tasks.length}
+              </span>
+            )}
+          </button>
+        </div>
       </div>
       
       <div className="flex-1 flex overflow-hidden">
-        <Sidebar
-          selectedFolder={selectedFolder}
-          selectedLabel={selectedLabel}
-          gmailLabels={gmailLabels}
-          onSelectFolder={(folder: EmailFolder) => {
-            setSelectedFolder(folder);
-            setSelectedLabel(null);
-            setSelectedEmailId(null);
-          }}
-          onSelectLabel={(label: string | null) => {
-            setSelectedLabel(label);
-            setSelectedEmailId(null);
-          }}
-          onManageLabels={() => setIsManagingLabels(true)}
-          unreadCount={unreadCount}
-        />
+        {currentTab === 'emails' ? (
+          <>
+            <Sidebar
+              selectedFolder={selectedFolder}
+              selectedLabel={selectedLabel}
+              gmailLabels={gmailLabels}
+              onSelectFolder={(folder: EmailFolder) => {
+                setSelectedFolder(folder);
+                setSelectedLabel(null);
+                setSelectedEmailId(null);
+              }}
+              onSelectLabel={(label: string | null) => {
+                setSelectedLabel(label);
+                setSelectedEmailId(null);
+              }}
+              onManageLabels={() => setIsManagingLabels(true)}
+              unreadCount={unreadCount}
+            />
 
-        <EmailList
-          emails={filteredEmails}
-          selectedEmailId={selectedEmailId}
-          selectedEmails={selectedEmails}
-          gmailLabels={gmailLabels}
-          onSelectEmail={setSelectedEmailId}
-          onToggleStar={handleToggleStar}
-          onToggleSelect={handleToggleSelect}
-          onSelectAll={handleSelectAll}
-          onBulkDelete={handleBulkDelete}
-          onBulkMarkAsRead={handleBulkMarkAsRead}
-          onBulkClassify={handleBulkClassify}
-          isClassifying={isClassifying}
-          classificationProgress={classificationProgress}
-        />
+            <EmailList
+              emails={filteredEmails}
+              selectedEmailId={selectedEmailId}
+              selectedEmails={selectedEmails}
+              gmailLabels={gmailLabels}
+              onSelectEmail={setSelectedEmailId}
+              onToggleStar={handleToggleStar}
+              onToggleSelect={handleToggleSelect}
+              onSelectAll={handleSelectAll}
+              onBulkDelete={handleBulkDelete}
+              onBulkMarkAsRead={handleBulkMarkAsRead}
+              onBulkClassify={handleBulkClassify}
+              onBulkExtractTasks={handleBulkExtractTasks}
+              isClassifying={isClassifying}
+              isExtractingTasks={isExtractingTasks}
+              classificationProgress={classificationProgress}
+              taskExtractionProgress={taskExtractionProgress}
+            />
 
-        {selectedEmail && (
-          <EmailDetail
-            email={selectedEmail}
-            gmailLabels={gmailLabels}
-            onClose={() => setSelectedEmailId(null)}
-            onDelete={handleDeleteEmail}
-            onArchive={handleArchiveEmail}
-            onToggleStar={handleToggleStar}
-            onMarkAsRead={handleMarkAsRead}
-            onAddLabel={handleAddLabel}
-            onRemoveLabel={handleRemoveLabel}
-            onSendReply={handleSendReply}
+            {selectedEmail && (
+              <EmailDetail
+                email={selectedEmail}
+                gmailLabels={gmailLabels}
+                onClose={() => setSelectedEmailId(null)}
+                onDelete={handleDeleteEmail}
+                onArchive={handleArchiveEmail}
+                onToggleStar={handleToggleStar}
+                onMarkAsRead={handleMarkAsRead}
+                onAddLabel={handleAddLabel}
+                onRemoveLabel={handleRemoveLabel}
+                onSendReply={handleSendReply}
+              />
+            )}
+          </>
+        ) : (
+          <TaskManagementPage
+            tasks={tasks}
+            onUpdateTask={handleUpdateTask}
+            onDeleteTask={handleDeleteTask}
+            onCreateTask={handleCreateTask}
           />
         )}
       </div>
