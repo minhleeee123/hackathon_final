@@ -1,5 +1,5 @@
 // AI Service - Agent 1 Email Classifier
-import { Email } from '../types';
+import { Email, PaymentItem } from '../types';
 
 const GEMINI_API_KEY = 'AIzaSyBKoPjBKVzNd7bKpx-y4fr7ZNSEeeSd6Ao';
 const GEMINI_MODEL = 'gemini-2.5-flash';
@@ -175,4 +175,93 @@ export function getClassificationSummary(results: BulkClassificationResult[]) {
   });
 
   return summary;
+}
+
+// ===== Agent 4: Payment Information Extractor =====
+
+export interface PaymentExtractionResult {
+  title: string;
+  amount: number;
+  currency: string;
+  dueDate?: string;
+  recipient?: string;
+  paymentMethod?: string;
+  description: string;
+}
+
+/**
+ * Extract payment information from finance-tagged emails using LLM4
+ */
+export async function extractPaymentInfo(email: Email): Promise<PaymentExtractionResult> {
+  const prompt = `Trích xuất thông tin thanh toán từ email sau:
+
+From: ${email.from.email}
+Subject: ${email.subject}
+Body: ${email.body}
+
+Hãy phân tích và trích xuất:
+1. Tên khoản phí/thanh toán
+2. Số tiền (chỉ số, không có ký tự)
+3. Đơn vị tiền tệ (VND, USD, EUR, etc.)
+4. Hạn thanh toán (format: YYYY-MM-DD)
+5. Người nhận/Đơn vị thu
+6. Phương thức thanh toán (nếu có)
+7. Mô tả chi tiết
+
+JSON format:
+{
+  "title": "Tên khoản phí",
+  "amount": 100000,
+  "currency": "VND",
+  "dueDate": "2025-12-31",
+  "recipient": "Công ty ABC",
+  "paymentMethod": "Chuyển khoản",
+  "description": "Mô tả chi tiết"
+}`;
+
+  try {
+    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: prompt
+          }]
+        }]
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    
+    if (data.candidates && data.candidates[0]) {
+      const text = data.candidates[0].content.parts[0].text;
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      
+      if (jsonMatch) {
+        const result = JSON.parse(jsonMatch[0]);
+        
+        return {
+          title: result.title || 'Khoản thanh toán',
+          amount: parseFloat(result.amount) || 0,
+          currency: result.currency || 'VND',
+          dueDate: result.dueDate,
+          recipient: result.recipient,
+          paymentMethod: result.paymentMethod,
+          description: result.description || email.snippet
+        };
+      }
+    }
+
+    throw new Error('Invalid API response');
+  } catch (error) {
+    console.error('Payment extraction error:', error);
+    throw error;
+  }
 }
