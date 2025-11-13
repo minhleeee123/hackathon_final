@@ -18,7 +18,7 @@ export const mockEmails: Email[] = [
     date: new Date('2025-11-12T14:30:00'),
     isRead: false,
     isStarred: true,
-    labels: ['label_work', 'label_task'],
+    labels: [], // Empty for mock demo - will be filled by "Classify" button
     hasAttachments: false,
     folder: 'inbox'
   },
@@ -39,7 +39,7 @@ export const mockEmails: Email[] = [
     date: new Date('2025-11-12T10:15:00'),
     isRead: true,
     isStarred: false,
-    labels: ['label_family', 'label_task'],
+    labels: [],
     hasAttachments: false,
     folder: 'inbox'
   },
@@ -61,7 +61,7 @@ export const mockEmails: Email[] = [
     date: new Date('2025-11-12T09:00:00'),
     isRead: true,
     isStarred: true,
-    labels: ['label_work', 'label_task'],
+    labels: [],
     hasAttachments: true,
     attachments: [
       { id: 'a1', name: 'Contract_Q4_Draft.pdf', size: 245000, type: 'application/pdf' }
@@ -84,7 +84,7 @@ export const mockEmails: Email[] = [
     date: new Date('2025-11-11T20:00:00'),
     isRead: true,
     isStarred: false,
-    labels: ['label_spam'],
+    labels: [],
     hasAttachments: false,
     folder: 'inbox'
   },
@@ -105,7 +105,7 @@ export const mockEmails: Email[] = [
     date: new Date('2025-11-11T18:30:00'),
     isRead: false,
     isStarred: false,
-    labels: ['label_friends'],
+    labels: [],
     hasAttachments: false,
     folder: 'inbox'
   },
@@ -127,7 +127,7 @@ export const mockEmails: Email[] = [
     date: new Date('2025-11-11T15:00:00'),
     isRead: false,
     isStarred: false,
-    labels: ['label_work', 'label_task'],
+    labels: [],
     hasAttachments: true,
     attachments: [
       { id: 'a2', name: 'Health_Check_Form.xlsx', size: 125000, type: 'application/vnd.ms-excel' }
@@ -154,7 +154,7 @@ export const mockEmails: Email[] = [
     date: new Date('2025-11-11T12:00:00'),
     isRead: true,
     isStarred: false,
-    labels: ['label_finance'],
+    labels: [],
     hasAttachments: false,
     folder: 'inbox'
   },
@@ -175,7 +175,7 @@ export const mockEmails: Email[] = [
     date: new Date('2025-11-10T08:00:00'),
     isRead: true,
     isStarred: false,
-    labels: ['label_spam'],
+    labels: [],
     hasAttachments: false,
     folder: 'inbox'
   },
@@ -195,7 +195,7 @@ export const mockEmails: Email[] = [
     date: new Date('2025-11-10T07:30:00'),
     isRead: false,
     isStarred: true,
-    labels: ['label_family'],
+    labels: [],
     hasAttachments: false,
     folder: 'inbox'
   },
@@ -219,7 +219,7 @@ export const mockEmails: Email[] = [
     date: new Date('2025-11-09T10:00:00'),
     isRead: true,
     isStarred: false,
-    labels: ['label_finance'],
+    labels: [],
     hasAttachments: false,
     folder: 'inbox'
   },
@@ -241,7 +241,7 @@ export const mockEmails: Email[] = [
     date: new Date('2025-11-11T16:00:00'),
     isRead: true,
     isStarred: false,
-    labels: ['label_work'],
+    labels: [],
     hasAttachments: false,
     folder: 'sent'
   },
@@ -261,7 +261,7 @@ export const mockEmails: Email[] = [
     date: new Date('2025-11-10T09:00:00'),
     isRead: true,
     isStarred: false,
-    labels: ['label_friends'],
+    labels: [],
     hasAttachments: false,
     folder: 'sent'
   },
