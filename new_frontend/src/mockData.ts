@@ -1,4 +1,4 @@
-import { Email, EmailFolder, EmailLabel } from './types';
+import { Email, EmailFolder, GmailLabel } from './types';
 
 export const mockEmails: Email[] = [
   {
@@ -18,7 +18,7 @@ export const mockEmails: Email[] = [
     date: new Date('2025-11-12T14:30:00'),
     isRead: false,
     isStarred: true,
-    labels: ['work', 'important'],
+    labels: ['label_work', 'label_task'],
     hasAttachments: false,
     folder: 'inbox'
   },
@@ -39,7 +39,7 @@ export const mockEmails: Email[] = [
     date: new Date('2025-11-12T10:15:00'),
     isRead: true,
     isStarred: false,
-    labels: ['family'],
+    labels: ['label_family', 'label_task'],
     hasAttachments: false,
     folder: 'inbox'
   },
@@ -61,7 +61,7 @@ export const mockEmails: Email[] = [
     date: new Date('2025-11-12T09:00:00'),
     isRead: true,
     isStarred: true,
-    labels: ['work'],
+    labels: ['label_work', 'label_task'],
     hasAttachments: true,
     attachments: [
       { id: 'a1', name: 'Contract_Q4_Draft.pdf', size: 245000, type: 'application/pdf' }
@@ -84,7 +84,7 @@ export const mockEmails: Email[] = [
     date: new Date('2025-11-11T20:00:00'),
     isRead: true,
     isStarred: false,
-    labels: ['promotion'],
+    labels: ['label_spam'],
     hasAttachments: false,
     folder: 'inbox'
   },
@@ -105,7 +105,7 @@ export const mockEmails: Email[] = [
     date: new Date('2025-11-11T18:30:00'),
     isRead: false,
     isStarred: false,
-    labels: ['friends'],
+    labels: ['label_friends'],
     hasAttachments: false,
     folder: 'inbox'
   },
@@ -127,7 +127,7 @@ export const mockEmails: Email[] = [
     date: new Date('2025-11-11T15:00:00'),
     isRead: false,
     isStarred: false,
-    labels: ['work'],
+    labels: ['label_work', 'label_task'],
     hasAttachments: true,
     attachments: [
       { id: 'a2', name: 'Health_Check_Form.xlsx', size: 125000, type: 'application/vnd.ms-excel' }
@@ -137,21 +137,24 @@ export const mockEmails: Email[] = [
   {
     id: '7',
     from: {
-      name: 'GitHub',
-      email: 'noreply@github.com',
-      avatar: '🐙'
+      name: 'Ngân hàng Vietcombank',
+      email: 'noreply@vietcombank.com.vn',
+      avatar: '🏦'
     },
     to: ['me@gmail.com'],
-    subject: '[GitHub] New pull request in your repository',
-    body: `<p>Hi there,</p>
-<p><strong>user123</strong> has opened a new pull request in <strong>your-repo</strong>:</p>
-<p><a href="#">#45: Add new feature for email handling</a></p>
-<p>Review and merge when ready.</p>`,
-    snippet: 'user123 has opened a new pull request in your-repo: #45 Add new feature for email handling',
+    subject: 'Thông báo: Hóa đơn thẻ tín dụng tháng 11',
+    body: `<p>Kính gửi Quý khách,</p>
+<p>Vietcombank xin thông báo hóa đơn thẻ tín dụng của Quý khách:</p>
+<p><strong>Số tiền:</strong> 5,450,000 VND<br>
+<strong>Hạn thanh toán:</strong> 25/11/2025<br>
+<strong>Số thẻ:</strong> **** **** **** 1234</p>
+<p>Vui lòng thanh toán đúng hạn để tránh phí phạt.</p>
+<p>Trân trọng!</p>`,
+    snippet: 'Vietcombank xin thông báo hóa đơn thẻ tín dụng: 5,450,000 VND, hạn thanh toán 25/11/2025',
     date: new Date('2025-11-11T12:00:00'),
     isRead: true,
     isStarred: false,
-    labels: ['social'],
+    labels: ['label_finance'],
     hasAttachments: false,
     folder: 'inbox'
   },
@@ -172,7 +175,7 @@ export const mockEmails: Email[] = [
     date: new Date('2025-11-10T08:00:00'),
     isRead: true,
     isStarred: false,
-    labels: ['promotion'],
+    labels: ['label_spam'],
     hasAttachments: false,
     folder: 'inbox'
   },
@@ -192,28 +195,31 @@ export const mockEmails: Email[] = [
     date: new Date('2025-11-10T07:30:00'),
     isRead: false,
     isStarred: true,
-    labels: ['family'],
+    labels: ['label_family'],
     hasAttachments: false,
     folder: 'inbox'
   },
   {
     id: '10',
     from: {
-      name: 'LinkedIn',
-      email: 'messages-noreply@linkedin.com',
-      avatar: '💼'
+      name: 'Điện lực Hà Nội',
+      email: 'cskh@evnhanoi.vn',
+      avatar: '⚡'
     },
     to: ['me@gmail.com'],
-    subject: 'Someone viewed your profile',
-    body: `<p>Hi,</p>
-<p><strong>5 people</strong> viewed your profile this week.</p>
-<p>See who's interested in your experience.</p>
-<p><a href="#">View profile views</a></p>`,
-    snippet: '5 people viewed your profile this week. See who\'s interested in your experience.',
+    subject: 'Thông báo: Hóa đơn tiền điện tháng 11/2025',
+    body: `<p>Kính gửi Quý khách hàng,</p>
+<p>Công ty Điện lực Hà Nội thông báo hóa đơn tiền điện tháng 11/2025:</p>
+<p><strong>Số tiền:</strong> 1,250,000 VND<br>
+<strong>Kỳ đọc:</strong> 01/11 - 30/11<br>
+<strong>Hạn thanh toán:</strong> 20/12/2025</p>
+<p>Quý khách vui lòng thanh toán qua App EVN Hanoi hoặc tại cửa hàng tiện lợi.</p>
+<p>Trân trọng!</p>`,
+    snippet: 'Hóa đơn tiền điện tháng 11: 1,250,000 VND, hạn thanh toán 20/12/2025',
     date: new Date('2025-11-09T10:00:00'),
     isRead: true,
     isStarred: false,
-    labels: ['social'],
+    labels: ['label_finance'],
     hasAttachments: false,
     folder: 'inbox'
   },
@@ -235,7 +241,7 @@ export const mockEmails: Email[] = [
     date: new Date('2025-11-11T16:00:00'),
     isRead: true,
     isStarred: false,
-    labels: ['work'],
+    labels: ['label_work'],
     hasAttachments: false,
     folder: 'sent'
   },
@@ -255,7 +261,7 @@ export const mockEmails: Email[] = [
     date: new Date('2025-11-10T09:00:00'),
     isRead: true,
     isStarred: false,
-    labels: ['friends'],
+    labels: ['label_friends'],
     hasAttachments: false,
     folder: 'sent'
   },
@@ -282,6 +288,64 @@ export const mockEmails: Email[] = [
   }
 ];
 
+// Mock Gmail Labels (giống như real data)
+export const mockGmailLabels: GmailLabel[] = [
+  {
+    id: 'label_work',
+    name: 'Công việc',
+    type: 'user',
+    color: {
+      backgroundColor: '#4a86e8',
+      textColor: '#ffffff'
+    }
+  },
+  {
+    id: 'label_family',
+    name: 'Người thân & Gia đình',
+    type: 'user',
+    color: {
+      backgroundColor: '#e07798',
+      textColor: '#ffffff'
+    }
+  },
+  {
+    id: 'label_friends',
+    name: 'Bạn bè',
+    type: 'user',
+    color: {
+      backgroundColor: '#42d692',
+      textColor: '#ffffff'
+    }
+  },
+  {
+    id: 'label_finance',
+    name: 'Tài chính',
+    type: 'user',
+    color: {
+      backgroundColor: '#fad165',
+      textColor: '#000000'
+    }
+  },
+  {
+    id: 'label_spam',
+    name: 'Spam & Quảng cáo',
+    type: 'user',
+    color: {
+      backgroundColor: '#a0a0a0',
+      textColor: '#ffffff'
+    }
+  },
+  {
+    id: 'label_task',
+    name: '📋 Task for Agent 2',
+    type: 'user',
+    color: {
+      backgroundColor: '#16a765',
+      textColor: '#ffffff'
+    }
+  }
+];
+
 export const folders: { id: EmailFolder; name: string; icon: string }[] = [
   { id: 'inbox', name: 'Inbox', icon: 'Inbox' },
   { id: 'starred', name: 'Starred', icon: 'Star' },
@@ -290,13 +354,4 @@ export const folders: { id: EmailFolder; name: string; icon: string }[] = [
   { id: 'spam', name: 'Spam', icon: 'AlertCircle' },
   { id: 'trash', name: 'Trash', icon: 'Trash2' },
   { id: 'all', name: 'All Mail', icon: 'MoreHorizontal' }
-];
-
-export const labels: { id: EmailLabel; name: string; color: string }[] = [
-  { id: 'work', name: 'Work', color: 'bg-blue-100 text-blue-800' },
-  { id: 'family', name: 'Family', color: 'bg-pink-100 text-pink-800' },
-  { id: 'friends', name: 'Friends', color: 'bg-green-100 text-green-800' },
-  { id: 'important', name: 'Important', color: 'bg-red-100 text-red-800' },
-  { id: 'promotion', name: 'Promotions', color: 'bg-purple-100 text-purple-800' },
-  { id: 'social', name: 'Social', color: 'bg-yellow-100 text-yellow-800' }
 ];

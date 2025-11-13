@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Email, EmailFolder, GmailLabel, Task, TaskStatus, PaymentItem } from './types';
-import { mockEmails } from './mockData';
+import { mockEmails, mockGmailLabels } from './mockData';
 import Sidebar from './components/Sidebar';
 import EmailList from './components/EmailList';
 import EmailDetail from './components/EmailDetail';
@@ -27,7 +27,7 @@ import { extractTasksBulk, TaskExtractionResult } from './services/taskExtractor
 
 function App() {
   const [emails, setEmails] = useState<Email[]>(mockEmails);
-  const [gmailLabels, setGmailLabels] = useState<GmailLabel[]>([]);
+  const [gmailLabels, setGmailLabels] = useState<GmailLabel[]>(mockGmailLabels);
   const [selectedFolder, setSelectedFolder] = useState<EmailFolder>('inbox');
   const [selectedLabel, setSelectedLabel] = useState<string | null>(null);
   const [selectedEmailId, setSelectedEmailId] = useState<string | null>(null);
@@ -59,13 +59,8 @@ function App() {
   const [isExtractingPayments, setIsExtractingPayments] = useState(false);
   const [paymentExtractionProgress, setPaymentExtractionProgress] = useState({ current: 0, total: 0 });
 
-  // Load Gmail emails and labels on mount
-  useEffect(() => {
-    if (useRealData) {
-      loadGmailData();
-    }
-  }, [useRealData]);
-
+  // Removed auto-load effect - only load when user explicitly toggles to real data
+  
   // Initialize AI classification labels
   useEffect(() => {
     const initLabels = async () => {
@@ -709,10 +704,13 @@ function App() {
         onToggleDataSource={() => {
           const newUseRealData = !useRealData;
           setUseRealData(newUseRealData);
-          if (!newUseRealData) {
+          if (newUseRealData) {
+            // Load real data when toggled on
+            loadGmailData();
+          } else {
             // Switch back to mock data
             setEmails(mockEmails);
-            setGmailLabels([]);
+            setGmailLabels(mockGmailLabels);
             setSelectedEmails(new Set());
             setSelectedEmailId(null);
           }
