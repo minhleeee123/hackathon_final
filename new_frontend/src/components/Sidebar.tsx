@@ -20,10 +20,11 @@ interface SidebarProps {
   onSelectFolder: (folder: EmailFolder) => void;
   onSelectLabel: (label: string | null) => void;
   onManageLabels: () => void;
+  onCompose: () => void;
   unreadCount: number;
 }
 
-export default function Sidebar({ selectedFolder, selectedLabel, gmailLabels, onSelectFolder, onSelectLabel, onManageLabels, unreadCount }: SidebarProps) {
+export default function Sidebar({ selectedFolder, selectedLabel, gmailLabels, onSelectFolder, onSelectLabel, onManageLabels, onCompose, unreadCount }: SidebarProps) {
   const getIconComponent = (iconName: string) => {
     const iconMap: { [key: string]: any } = {
       Inbox,
@@ -120,7 +121,7 @@ export default function Sidebar({ selectedFolder, selectedLabel, gmailLabels, on
     <div className="w-64 border-r border-gray-200 flex flex-col bg-white flex-shrink-0">
       <div className="p-4">
         <button 
-          onClick={() => {}}
+          onClick={onCompose}
           className="w-full flex items-center gap-3 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-md transition-all"
         >
           <Edit className="w-5 h-5" />

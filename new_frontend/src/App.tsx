@@ -679,6 +679,7 @@ function App() {
                 setSelectedEmailId(null);
               }}
               onManageLabels={() => setIsManagingLabels(true)}
+              onCompose={() => setIsComposing(true)}
               unreadCount={unreadCount}
             />
 

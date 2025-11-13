@@ -5,7 +5,7 @@ import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { Plus, Search, Filter, Sparkles } from 'lucide-react';
+import { Plus, Search, Filter } from 'lucide-react';
 import { Task, TaskStatus, TaskSource } from '../types';
 import TaskDialog from './TaskDialog';
 import TaskColumn from './TaskColumn';
@@ -100,10 +100,6 @@ export default function TaskManagementPage({
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-semibold text-gray-900">Quản lý Task</h2>
-            <p className="text-gray-600 flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-yellow-500" />
-              Kéo thả task giữa các cột để thay đổi trạng thái
-            </p>
           </div>
           <Button onClick={() => setIsCreating(true)} className="gap-2">
             <Plus className="w-4 h-4" />
@@ -152,22 +148,6 @@ export default function TaskManagementPage({
             </Select>
           </div>
         </Card>
-
-        {/* Task Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="p-4">
-            <div className="text-gray-600 text-sm">Cần làm</div>
-            <div className="text-2xl font-semibold text-gray-900 mt-1">{groupedTasks['to-do'].length} task</div>
-          </Card>
-          <Card className="p-4">
-            <div className="text-gray-600 text-sm">Đang làm</div>
-            <div className="text-2xl font-semibold text-gray-900 mt-1">{groupedTasks['in-process'].length} task</div>
-          </Card>
-          <Card className="p-4">
-            <div className="text-gray-600 text-sm">Hoàn thành</div>
-            <div className="text-2xl font-semibold text-gray-900 mt-1">{groupedTasks['completed'].length} task</div>
-          </Card>
-        </div>
 
         {/* Task Board with Drag and Drop */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
