@@ -20,8 +20,7 @@ import {
   deleteLabel as gmailDeleteLabel,
   initializeAILabels
 } from './services/gmailService';
-import { BulkClassificationResult, CATEGORY_LABELS, TASK_LABEL } from './services/aiService';
-import ClassificationDialog from './components/ClassificationDialog';
+import { BulkClassificationResult, TASK_LABEL, classifyEmailsBulk } from './services/aiService';
 
 function App() {
   const [emails, setEmails] = useState<Email[]>(mockEmails);
@@ -43,6 +42,7 @@ function App() {
   const [isLoading, setIsLoading] = useState(false);
   const [useRealData, setUseRealData] = useState(false);
   const [isClassifying, setIsClassifying] = useState(false);
+  const [classificationProgress, setClassificationProgress] = useState({ current: 0, total: 0 });
   const [aiLabelsInitialized, setAiLabelsInitialized] = useState(false);
 
   // Load Gmail emails and labels on mount
@@ -308,8 +308,29 @@ function App() {
   };
 
   // AI Classification handlers
-  const handleBulkClassify = () => {
+  const handleBulkClassify = async () => {
     setIsClassifying(true);
+    setClassificationProgress({ current: 0, total: selectedEmails.size });
+
+    try {
+      const emailsToClassify = Array.from(selectedEmails)
+        .map(id => emails.find(e => e.id === id)!)
+        .filter(Boolean);
+
+      const results = await classifyEmailsBulk(
+        emailsToClassify,
+        (current, total) => {
+          setClassificationProgress({ current, total });
+        }
+      );
+
+      await handleClassificationComplete(results);
+    } catch (error) {
+      console.error('Classification failed:', error);
+    } finally {
+      setIsClassifying(false);
+      setClassificationProgress({ current: 0, total: 0 });
+    }
   };
 
   const handleClassificationComplete = async (results: BulkClassificationResult[]) => {
@@ -327,12 +348,21 @@ function App() {
       // Apply labels to each successfully classified email
       for (const result of results) {
         if (result.success && result.classification) {
+          console.log(`Email ${result.emailId} classification:`, {
+            category: result.classification.category,
+            gmailLabel: result.classification.gmailLabel,
+            hasTask: result.classification.hasTask,
+            needsTaskLabel: result.classification.needsTaskLabel,
+            confidence: result.classification.confidence
+          });
+
           const labelIds: string[] = [];
           
           // Add main category label
           if (result.classification.gmailLabel) {
             const labelId = findLabelId(result.classification.gmailLabel);
             if (labelId) {
+              console.log(`  -> Adding category label: ${result.classification.gmailLabel} (${labelId})`);
               labelIds.push(labelId);
             }
           }
@@ -341,11 +371,12 @@ function App() {
           if (result.classification.needsTaskLabel) {
             const taskLabelId = findLabelId(TASK_LABEL);
             if (taskLabelId) {
+              console.log(`  -> Adding task label: ${TASK_LABEL} (${taskLabelId})`);
               labelIds.push(taskLabelId);
             }
           }
           
-          console.log(`Applying labels to email ${result.emailId}:`, labelIds);
+          console.log(`  -> Total labels to apply:`, labelIds);
           
           // Apply labels
           if (labelIds.length > 0 && useRealData) {
@@ -544,6 +575,8 @@ function App() {
           onBulkDelete={handleBulkDelete}
           onBulkMarkAsRead={handleBulkMarkAsRead}
           onBulkClassify={handleBulkClassify}
+          isClassifying={isClassifying}
+          classificationProgress={classificationProgress}
         />
 
         {selectedEmail && (
@@ -582,15 +615,6 @@ function App() {
           gmailLabels={gmailLabels}
           onCreateLabel={handleCreateLabel}
           onDeleteLabel={handleDeleteLabel}
-        />
-      )}
-
-      {isClassifying && (
-        <ClassificationDialog
-          isOpen={isClassifying}
-          selectedEmails={Array.from(selectedEmails).map(id => emails.find(e => e.id === id)!).filter(Boolean)}
-          onClose={() => setIsClassifying(false)}
-          onComplete={handleClassificationComplete}
         />
       )}
     </div>

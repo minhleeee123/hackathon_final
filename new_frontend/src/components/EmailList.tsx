@@ -15,6 +15,8 @@ interface EmailListProps {
   onBulkDelete: () => void;
   onBulkMarkAsRead: (isRead: boolean) => void;
   onBulkClassify?: () => void;
+  isClassifying?: boolean;
+  classificationProgress?: { current: number; total: number };
 }
 
 export default function EmailList({
@@ -29,6 +31,8 @@ export default function EmailList({
   onBulkDelete,
   onBulkMarkAsRead,
   onBulkClassify,
+  isClassifying = false,
+  classificationProgress = { current: 0, total: 0 },
 }: EmailListProps) {
   const hasSelection = selectedEmails.size > 0;
 
@@ -124,14 +128,35 @@ export default function EmailList({
         {hasSelection ? (
           <>
             {onBulkClassify && (
-              <button
-                onClick={onBulkClassify}
-                className="px-3 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center gap-1.5 text-sm font-medium"
-                title="Phân loại tự động bằng AI"
-              >
-                <Sparkles className="w-4 h-4" />
-                Phân loại tự động
-              </button>
+              <>
+                <button
+                  onClick={onBulkClassify}
+                  disabled={isClassifying}
+                  className={`px-3 py-1.5 rounded transition-colors flex items-center gap-1.5 text-sm font-medium ${
+                    isClassifying 
+                      ? 'bg-blue-400 text-white cursor-not-allowed' 
+                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                  }`}
+                  title="Phân loại tự động bằng AI"
+                >
+                  <Sparkles className={`w-4 h-4 ${isClassifying ? 'animate-spin' : ''}`} />
+                  {isClassifying ? 'Đang phân loại...' : 'Phân loại tự động'}
+                </button>
+                
+                {isClassifying && classificationProgress.total > 0 && (
+                  <div className="flex items-center gap-2 ml-2">
+                    <div className="w-32 bg-gray-200 rounded-full h-2">
+                      <div
+                        className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${(classificationProgress.current / classificationProgress.total) * 100}%` }}
+                      />
+                    </div>
+                    <span className="text-xs text-gray-600">
+                      {classificationProgress.current}/{classificationProgress.total}
+                    </span>
+                  </div>
+                )}
+              </>
             )}
             <div className="w-px h-6 bg-gray-300 mx-1" />
             <button
