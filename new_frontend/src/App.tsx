@@ -615,45 +615,21 @@ function App() {
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         onCompose={() => setIsComposing(true)}
+        useRealData={useRealData}
+        onToggleDataSource={() => {
+          setUseRealData(!useRealData);
+          if (!useRealData) {
+            setEmails(mockEmails);
+          }
+        }}
+        onRefreshData={loadGmailData}
+        isLoading={isLoading}
       />
-
-      {/* Toggle between Mock Data and Real Gmail Data */}
-      <div className="px-4 py-2 bg-yellow-50 border-b border-yellow-200 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <span className="text-sm font-medium text-gray-700">Data Source:</span>
-          <button
-            onClick={() => {
-              setUseRealData(!useRealData);
-              if (!useRealData) {
-                setEmails(mockEmails);
-              }
-            }}
-            className={`px-4 py-1 rounded-full text-sm font-medium transition-all ${
-              useRealData 
-                ? 'bg-green-600 text-white' 
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-          >
-            {useRealData ? '✓ Gmail API (Real Data)' : 'Mock Data'}
-          </button>
-          {useRealData && (
-            <button
-              onClick={loadGmailData}
-              disabled={isLoading}
-              className="px-3 py-1 bg-blue-600 text-white rounded-full text-sm hover:bg-blue-700 disabled:opacity-50"
-            >
-              {isLoading ? 'Loading...' : '🔄 Refresh'}
-            </button>
-          )}
-        </div>
-        <span className="text-xs text-gray-500">
-          {emails.length} emails | {tasks.length} tasks
-        </span>
-      </div>
 
       {/* Tab Navigation */}
       <div className="border-b border-gray-200 bg-white">
-        <div className="flex gap-6 px-6">
+        <div className="flex items-center justify-between px-6">
+          <div className="flex gap-6">
           <button
             onClick={() => setCurrentTab('emails')}
             className={`py-3 px-4 font-medium transition-colors border-b-2 ${
@@ -679,6 +655,11 @@ function App() {
               </span>
             )}
           </button>
+          </div>
+          
+          <div className="text-xs text-gray-500 py-3">
+            {emails.length} emails | {tasks.length} tasks
+          </div>
         </div>
       </div>
       
