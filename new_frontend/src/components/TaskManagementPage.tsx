@@ -13,13 +13,15 @@ import { toast } from 'sonner';
 
 interface TaskManagementPageProps {
   tasks: Task[];
+  emails?: any[]; // Email data for task grouping
   onUpdateTask: (task: Task) => void;
   onDeleteTask: (taskId: string) => void;
   onCreateTask: (task: Omit<Task, 'id' | 'createdAt' | 'source'>) => void;
 }
 
 export default function TaskManagementPage({ 
-  tasks, 
+  tasks,
+  emails = [],
   onUpdateTask,
   onDeleteTask,
   onCreateTask
@@ -173,6 +175,7 @@ export default function TaskManagementPage({
             status="to-do"
             title={getStatusLabel('to-do')}
             tasks={groupedTasks['to-do']}
+            emails={emails}
             badgeClassName={getStatusColor('to-do')}
             onTaskClick={setSelectedTask}
             onTaskDrop={handleTaskDrop}
@@ -181,6 +184,7 @@ export default function TaskManagementPage({
             status="in-process"
             title={getStatusLabel('in-process')}
             tasks={groupedTasks['in-process']}
+            emails={emails}
             badgeClassName={getStatusColor('in-process')}
             onTaskClick={setSelectedTask}
             onTaskDrop={handleTaskDrop}
@@ -189,6 +193,7 @@ export default function TaskManagementPage({
             status="completed"
             title={getStatusLabel('completed')}
             tasks={groupedTasks['completed']}
+            emails={emails}
             badgeClassName={getStatusColor('completed')}
             onTaskClick={setSelectedTask}
             onTaskDrop={handleTaskDrop}

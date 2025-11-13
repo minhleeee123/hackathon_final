@@ -739,6 +739,7 @@ function App() {
         ) : (
           <TaskManagementPage
             tasks={tasks}
+            emails={emails}
             onUpdateTask={handleUpdateTask}
             onDeleteTask={handleDeleteTask}
             onCreateTask={handleCreateTask}

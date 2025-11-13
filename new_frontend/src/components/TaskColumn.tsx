@@ -2,12 +2,13 @@ import { useDrop } from 'react-dnd';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
 import { Task, TaskStatus } from '../types';
-import DraggableTaskCard, { ItemType } from './DraggableTaskCard';
+import TaskGroupCard, { ItemType } from './TaskGroupCard';
 
 interface TaskColumnProps {
   status: TaskStatus;
   title: string;
   tasks: Task[];
+  emails?: any[]; // Email data for showing email info
   badgeClassName: string;
   onTaskClick: (task: Task) => void;
   onTaskDrop: (task: Task, newStatus: TaskStatus) => void;
@@ -17,6 +18,7 @@ export default function TaskColumn({
   status, 
   title, 
   tasks, 
+  emails = [],
   badgeClassName, 
   onTaskClick,
   onTaskDrop 
@@ -32,6 +34,33 @@ export default function TaskColumn({
       isOver: monitor.isOver(),
     }),
   }));
+
+  // Group tasks by emailId
+  const groupedTasks: { [key: string]: Task[] } = {};
+  const standaloneTasks: Task[] = [];
+
+  tasks.forEach(task => {
+    if (task.emailId) {
+      if (!groupedTasks[task.emailId]) {
+        groupedTasks[task.emailId] = [];
+      }
+      groupedTasks[task.emailId].push(task);
+    } else {
+      standaloneTasks.push(task);
+    }
+  });
+
+  // Get email info for a task
+  const getEmailInfo = (emailId: string) => {
+    const email = emails.find(e => e.id === emailId);
+    if (!email) return undefined;
+    
+    return {
+      from: email.from.name || email.from.email,
+      subject: email.subject,
+      date: email.date
+    };
+  };
 
   return (
     <div 
@@ -50,11 +79,22 @@ export default function TaskColumn({
       </div>
 
       <div className="space-y-3">
-        {tasks.map((task) => (
-          <DraggableTaskCard
+        {/* Grouped tasks from emails */}
+        {Object.entries(groupedTasks).map(([emailId, emailTasks]) => (
+          <TaskGroupCard
+            key={emailId}
+            tasks={emailTasks}
+            emailInfo={getEmailInfo(emailId)}
+            onClick={onTaskClick}
+          />
+        ))}
+
+        {/* Standalone tasks (user-created) */}
+        {standaloneTasks.map((task) => (
+          <TaskGroupCard
             key={task.id}
-            task={task}
-            onClick={() => onTaskClick(task)}
+            tasks={[task]}
+            onClick={onTaskClick}
           />
         ))}
 
