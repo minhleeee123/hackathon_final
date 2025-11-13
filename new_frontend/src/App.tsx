@@ -458,8 +458,7 @@ function App() {
             category: result.classification.category,
             gmailLabel: result.classification.gmailLabel,
             hasTask: result.classification.hasTask,
-            needsTaskLabel: result.classification.needsTaskLabel,
-            confidence: result.classification.confidence
+            needsTaskLabel: result.classification.needsTaskLabel
           });
 
           const labelIds: string[] = [];

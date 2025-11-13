@@ -1,7 +1,7 @@
 // AI Service - Agent 1 Email Classifier
 import { Email } from '../types';
 
-const GEMINI_API_KEY = 'AIzaSyDo-qk0G6OW2lv7bpNk72zAT9tT1Dz-TFw';
+const GEMINI_API_KEY = 'AIzaSyBKoPjBKVzNd7bKpx-y4fr7ZNSEeeSd6Ao';
 const GEMINI_MODEL = 'gemini-2.5-flash';
 const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
@@ -12,17 +12,15 @@ export const CATEGORY_LABELS = {
   'Friends': 'Bạn bè',
   'Finance': 'Tài chính',
   'Spam': 'Spam & Quảng cáo',
-  'Promotion': 'Spam & Quảng cáo',
-  'Uncertain': 'Cần xác minh'
+  'Promotion': 'Spam & Quảng cáo'
 } as const;
 
 export const TASK_LABEL = '📋 Task for Agent 2';
 
 export interface ClassificationResult {
-  category: 'Work' | 'Family' | 'Friends' | 'Finance' | 'Spam' | 'Promotion' | 'Uncertain';
+  category: 'Work' | 'Family' | 'Friends' | 'Finance' | 'Spam' | 'Promotion';
   hasTask: boolean;
   reasoning: string;
-  confidence: number;
   gmailLabel: string;
   needsTaskLabel: boolean;
   isSpam: boolean;
@@ -39,32 +37,27 @@ export interface BulkClassificationResult {
  * Classify a single email using Agent 1
  */
 export async function classifyEmail(email: Email): Promise<ClassificationResult> {
-  const prompt = `You are an Email Classifier AI. Analyze this email and classify it.
+  // Truncate body to 200 characters
+  const truncatedBody = email.body.length > 200 
+    ? email.body.substring(0, 200) + '...' 
+    : email.body;
 
-Email:
+  const prompt = `Classify email:
 From: ${email.from.email}
 Subject: ${email.subject}
-Body: ${email.body}
+Body: ${truncatedBody}
 
-Tasks:
-1. Classify into ONE category: "Work", "Family", "Friends", "Finance", "Spam", "Promotion", "Uncertain"
-   - Work: Professional emails, meetings, projects, colleagues
-   - Family: Personal emails from family members
-   - Friends: Personal emails from friends
-   - Finance: Bills, invoices, payments, banking, receipts, financial statements
-   - Spam: Unwanted bulk emails
-   - Promotion: Marketing emails, sales, advertisements
-   - Uncertain: When unable to confidently classify (use this if confidence < 0.7)
-2. Determine if it contains tasks/action items (true/false)
-3. Provide reasoning
+Categories: Work|Family|Friends|Finance|Spam|Promotion
+- Work: Professional, meetings, projects
+- Family: Personal from family
+- Friends: Personal from friends
+- Finance: Bills, invoices, payments
+- Spam: Unwanted bulk
+- Promotion: Marketing, ads
 
-Respond ONLY with valid JSON (no markdown):
-{
-  "category": "Work|Family|Friends|Finance|Spam|Promotion|Uncertain",
-  "hasTask": true|false,
-  "reasoning": "Brief explanation",
-  "confidence": 0.0-1.0
-}`;
+Task: Does it contain actionable items? (yes/no)
+
+JSON: {"category":"","hasTask":false,"reasoning":""}`;
 
   try {
     const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
@@ -98,7 +91,6 @@ Respond ONLY with valid JSON (no markdown):
           category: result.category,
           hasTask: result.hasTask,
           reasoning: result.reasoning,
-          confidence: result.confidence,
           gmailLabel: CATEGORY_LABELS[result.category as keyof typeof CATEGORY_LABELS],
           needsTaskLabel: result.hasTask,
           isSpam: result.category === 'Spam' || result.category === 'Promotion'

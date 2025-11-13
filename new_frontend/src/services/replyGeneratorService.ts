@@ -1,7 +1,7 @@
 // AI Service - Agent 3 Reply Generator
 import { Email } from '../types';
 
-const GEMINI_API_KEY = 'AIzaSyDo-qk0G6OW2lv7bpNk72zAT9tT1Dz-TFw';
+const GEMINI_API_KEY = 'AIzaSyBKoPjBKVzNd7bKpx-y4fr7ZNSEeeSd6Ao';
 const GEMINI_MODEL = 'gemini-2.5-flash';
 const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
