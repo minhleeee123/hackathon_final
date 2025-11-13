@@ -31,6 +31,18 @@ const sampleEmails = [
     from: "john@company.com",
     subject: "Meeting notes from yesterday",
     body: "Here are the action items: 1. Review proposal, 2. Schedule follow-up, 3. Prepare presentation"
+  },
+  {
+    id: 5,
+    from: "billing@vietcombank.com",
+    subject: "Payment reminder - Credit card bill",
+    body: "Your credit card bill of 5,000,000 VND is due on November 20, 2025. Please make payment to avoid late fees."
+  },
+  {
+    id: 6,
+    from: "friend@gmail.com",
+    subject: "Coffee this weekend?",
+    body: "Hey! Long time no see. Want to grab coffee this Saturday? Let me know!"
   }
 ];
 
@@ -45,13 +57,19 @@ Subject: ${email.subject}
 Body: ${email.body}
 
 Tasks:
-1. Classify into ONE category: "Work", "Family", "Friends", "Spam", "Promotion"
+1. Classify into ONE category: "Work", "Family", "Friends", "Finance", "Spam", "Promotion"
+   - Work: Professional emails, meetings, projects, colleagues
+   - Family: Personal emails from family members
+   - Friends: Personal emails from friends
+   - Finance: Bills, invoices, payments, banking, receipts, financial statements
+   - Spam: Unwanted bulk emails
+   - Promotion: Marketing emails, sales, advertisements
 2. Determine if it contains tasks/action items (true/false)
 3. Provide reasoning
 
 Respond ONLY with valid JSON (no markdown):
 {
-  "category": "Work|Family|Friends|Spam|Promotion",
+  "category": "Work|Family|Friends|Finance|Spam|Promotion",
   "hasTask": true|false,
   "reasoning": "Brief explanation",
   "confidence": 0.0-1.0

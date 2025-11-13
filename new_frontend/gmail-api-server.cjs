@@ -362,6 +362,111 @@ app.delete('/api/labels/:labelId', async (req, res) => {
   }
 });
 
+// Initialize AI Labels - Create required labels if they don't exist
+app.post('/api/ai/init-labels', async (req, res) => {
+  try {
+    const auth = await authorize();
+    const gmail = google.gmail({ version: 'v1', auth });
+
+    const requiredLabels = [
+      { 
+        name: 'Công việc', 
+        color: { 
+          backgroundColor: '#42d692',  // Green palette
+          textColor: '#ffffff'
+        } 
+      },
+      { 
+        name: 'Người thân & Gia đình', 
+        color: { 
+          backgroundColor: '#fbd75b',  // Yellow palette
+          textColor: '#594c05'
+        } 
+      },
+      { 
+        name: 'Bạn bè', 
+        color: { 
+          backgroundColor: '#fb4c2f',  // Red palette
+          textColor: '#ffffff'
+        } 
+      },
+      { 
+        name: 'Tài chính', 
+        color: { 
+          backgroundColor: '#16a765',  // Dark green palette
+          textColor: '#ffffff'
+        } 
+      },
+      { 
+        name: 'Spam & Quảng cáo', 
+        color: { 
+          backgroundColor: '#e07798',  // Pink palette
+          textColor: '#ffffff'
+        } 
+      },
+      { 
+        name: '📋 Task for Agent 2', 
+        color: { 
+          backgroundColor: '#ac2b16',  // Dark red palette
+          textColor: '#ffffff'
+        } 
+      }
+    ];
+    // Get existing labels
+    const labelsRes = await gmail.users.labels.list({ userId: 'me' });
+    const existingLabels = labelsRes.data.labels || [];
+    const existingLabelNames = existingLabels.map(l => l.name);
+
+    const createdLabels = [];
+    const skippedLabels = [];
+    const updatedLabels = [];
+
+    for (const labelConfig of requiredLabels) {
+      if (existingLabelNames.includes(labelConfig.name)) {
+        const existing = existingLabels.find(l => l.name === labelConfig.name);
+        
+        // Update color if label exists
+        try {
+          await gmail.users.labels.update({
+            userId: 'me',
+            id: existing.id,
+            requestBody: {
+              name: labelConfig.name,
+              color: labelConfig.color
+            }
+          });
+          updatedLabels.push({ name: labelConfig.name, id: existing.id, existed: true });
+        } catch (error) {
+          console.log(`Could not update color for ${labelConfig.name}:`, error.message);
+          skippedLabels.push({ name: labelConfig.name, id: existing.id, existed: true });
+        }
+      } else {
+        const newLabel = await gmail.users.labels.create({
+          userId: 'me',
+          requestBody: {
+            name: labelConfig.name,
+            labelListVisibility: 'labelShow',
+            messageListVisibility: 'show',
+            color: labelConfig.color
+          }
+        });
+        createdLabels.push({ name: labelConfig.name, id: newLabel.data.id, existed: false });
+      }
+    }
+
+    res.json({
+      success: true,
+      created: createdLabels,
+      updated: updatedLabels,
+      existed: skippedLabels,
+      total: createdLabels.length + updatedLabels.length + skippedLabels.length
+    });
+  } catch (error) {
+    console.error('Error initializing AI labels:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.post('/api/emails/send', async (req, res) => {
   try {
     const auth = await authorize();

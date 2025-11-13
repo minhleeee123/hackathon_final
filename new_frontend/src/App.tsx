@@ -17,8 +17,11 @@ import {
   addLabelToEmail as gmailAddLabel,
   removeLabelFromEmail as gmailRemoveLabel,
   createLabel as gmailCreateLabel,
-  deleteLabel as gmailDeleteLabel
+  deleteLabel as gmailDeleteLabel,
+  initializeAILabels
 } from './services/gmailService';
+import { BulkClassificationResult, CATEGORY_LABELS, TASK_LABEL } from './services/aiService';
+import ClassificationDialog from './components/ClassificationDialog';
 
 function App() {
   const [emails, setEmails] = useState<Email[]>(mockEmails);
@@ -39,6 +42,8 @@ function App() {
   const [selectedEmails, setSelectedEmails] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
   const [useRealData, setUseRealData] = useState(false);
+  const [isClassifying, setIsClassifying] = useState(false);
+  const [aiLabelsInitialized, setAiLabelsInitialized] = useState(false);
 
   // Load Gmail emails and labels on mount
   useEffect(() => {
@@ -46,6 +51,26 @@ function App() {
       loadGmailData();
     }
   }, [useRealData]);
+
+  // Initialize AI classification labels
+  useEffect(() => {
+    const initLabels = async () => {
+      if (useRealData && !aiLabelsInitialized) {
+        try {
+          const result = await initializeAILabels();
+          console.log('AI labels initialized:', result);
+          setAiLabelsInitialized(true);
+          
+          // Reload labels to get the new ones
+          const labelsData = await fetchGmailLabels();
+          setGmailLabels(labelsData.labels);
+        } catch (error) {
+          console.error('Failed to initialize AI labels:', error);
+        }
+      }
+    };
+    initLabels();
+  }, [useRealData, aiLabelsInitialized]);
 
   const loadGmailData = async () => {
     setIsLoading(true);
@@ -282,6 +307,68 @@ function App() {
     setSelectedEmails(new Set());
   };
 
+  // AI Classification handlers
+  const handleBulkClassify = () => {
+    setIsClassifying(true);
+  };
+
+  const handleClassificationComplete = async (results: BulkClassificationResult[]) => {
+    try {
+      // Helper to find label ID by name
+      const findLabelId = (labelName: string): string | null => {
+        const label = gmailLabels.find(l => l.name === labelName);
+        console.log(`Finding label "${labelName}":`, label ? `Found ID=${label.id}` : 'NOT FOUND');
+        return label?.id || null;
+      };
+
+      console.log('Available labels:', gmailLabels.map(l => ({ id: l.id, name: l.name })));
+      console.log('Classification results:', results);
+
+      // Apply labels to each successfully classified email
+      for (const result of results) {
+        if (result.success && result.classification) {
+          const labelIds: string[] = [];
+          
+          // Add main category label
+          if (result.classification.gmailLabel) {
+            const labelId = findLabelId(result.classification.gmailLabel);
+            if (labelId) {
+              labelIds.push(labelId);
+            }
+          }
+          
+          // Add task label if email contains task
+          if (result.classification.needsTaskLabel) {
+            const taskLabelId = findLabelId(TASK_LABEL);
+            if (taskLabelId) {
+              labelIds.push(taskLabelId);
+            }
+          }
+          
+          console.log(`Applying labels to email ${result.emailId}:`, labelIds);
+          
+          // Apply labels
+          if (labelIds.length > 0 && useRealData) {
+            await handleAddLabel(result.emailId, labelIds);
+          } else if (labelIds.length === 0) {
+            console.warn(`No labels found for email ${result.emailId}`);
+          }
+        }
+      }
+
+      // Clear selection and reload
+      setSelectedEmails(new Set());
+      if (useRealData) {
+        await loadGmailData();
+      }
+      
+    } catch (error) {
+      console.error('Failed to apply classification labels:', error);
+    } finally {
+      setIsClassifying(false);
+    }
+  };
+
   // Label management functions
   const handleAddLabel = async (emailId: string, labelIds: string[]) => {
     if (!useRealData) return;
@@ -456,6 +543,7 @@ function App() {
           onSelectAll={handleSelectAll}
           onBulkDelete={handleBulkDelete}
           onBulkMarkAsRead={handleBulkMarkAsRead}
+          onBulkClassify={handleBulkClassify}
         />
 
         {selectedEmail && (
@@ -494,6 +582,15 @@ function App() {
           gmailLabels={gmailLabels}
           onCreateLabel={handleCreateLabel}
           onDeleteLabel={handleDeleteLabel}
+        />
+      )}
+
+      {isClassifying && (
+        <ClassificationDialog
+          isOpen={isClassifying}
+          selectedEmails={Array.from(selectedEmails).map(id => emails.find(e => e.id === id)!).filter(Boolean)}
+          onClose={() => setIsClassifying(false)}
+          onComplete={handleClassificationComplete}
         />
       )}
     </div>

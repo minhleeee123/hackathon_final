@@ -174,3 +174,24 @@ export async function deleteLabel(labelId: string): Promise<void> {
     throw error;
   }
 }
+
+export async function initializeAILabels(): Promise<{
+  success: boolean;
+  created: Array<{ name: string; id: string; existed: boolean }>;
+  existed: Array<{ name: string; id: string; existed: boolean }>;
+  total: number;
+}> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/ai/init-labels`, {
+      method: 'POST',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to initialize AI labels');
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error initializing AI labels:', error);
+    throw error;
+  }
+}

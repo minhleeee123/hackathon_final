@@ -1,5 +1,5 @@
 import { Email, GmailLabel } from '../types';
-import { Star, Archive, Trash2, MoreVertical, RefreshCw } from 'lucide-react';
+import { Star, Archive, Trash2, MoreVertical, RefreshCw, Sparkles } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
 
@@ -14,6 +14,7 @@ interface EmailListProps {
   onSelectAll: () => void;
   onBulkDelete: () => void;
   onBulkMarkAsRead: (isRead: boolean) => void;
+  onBulkClassify?: () => void;
 }
 
 export default function EmailList({
@@ -27,6 +28,7 @@ export default function EmailList({
   onSelectAll,
   onBulkDelete,
   onBulkMarkAsRead,
+  onBulkClassify,
 }: EmailListProps) {
   const hasSelection = selectedEmails.size > 0;
 
@@ -36,18 +38,72 @@ export default function EmailList({
       return 'bg-gray-200 text-gray-700';
     }
     
+    const bg = label.color.backgroundColor.toLowerCase();
+    
+    // Direct color mapping from Gmail palette
     const colorMap: { [key: string]: string } = {
-      '#fb4c2f': 'bg-red-100 text-red-800',
-      '#ffad47': 'bg-orange-100 text-orange-800',
-      '#fad165': 'bg-yellow-100 text-yellow-800',
-      '#16a766': 'bg-green-100 text-green-800',
+      // Green shades
+      '#42d692': 'bg-green-100 text-green-800',
+      '#16a765': 'bg-green-700 text-white',
       '#43d692': 'bg-green-100 text-green-700',
-      '#4a86e8': 'bg-blue-100 text-blue-800',
-      '#a479e2': 'bg-purple-100 text-purple-800',
+      
+      // Yellow shades
+      '#fbd75b': 'bg-yellow-100 text-yellow-800',
+      '#fad165': 'bg-yellow-100 text-yellow-800',
+      
+      // Red shades
+      '#fb4c2f': 'bg-red-100 text-red-800',
+      '#ac2b16': 'bg-red-800 text-white',
+      
+      // Pink shades
+      '#e07798': 'bg-pink-100 text-pink-800',
       '#f691b3': 'bg-pink-100 text-pink-800',
+      
+      // Orange shades
+      '#ffad47': 'bg-orange-100 text-orange-800',
+      
+      // Blue shades
+      '#4a86e8': 'bg-blue-100 text-blue-800',
+      
+      // Purple shades
+      '#a479e2': 'bg-purple-100 text-purple-800',
     };
 
-    return colorMap[label.color.backgroundColor.toLowerCase()] || 'bg-gray-200 text-gray-700';
+    // If exact match found, use it
+    if (colorMap[bg]) {
+      return colorMap[bg];
+    }
+    
+    // Otherwise use inline styles with actual color
+    return '';
+  };
+
+  // Helper to get inline styles for labels
+  const getLabelStyle = (label: GmailLabel): React.CSSProperties => {
+    if (!label.color?.backgroundColor) {
+      return {};
+    }
+    
+    const colorMap: { [key: string]: string } = {
+      '#42d692': '', '#16a765': '', '#43d692': '',
+      '#fbd75b': '', '#fad165': '',
+      '#fb4c2f': '', '#ac2b16': '',
+      '#e07798': '', '#f691b3': '',
+      '#ffad47': '', '#4a86e8': '', '#a479e2': ''
+    };
+    
+    const bg = label.color.backgroundColor.toLowerCase();
+    
+    // If in predefined palette, use Tailwind classes (return empty style)
+    if (colorMap.hasOwnProperty(bg)) {
+      return {};
+    }
+    
+    // For custom colors, use inline styles
+    return {
+      backgroundColor: label.color.backgroundColor,
+      color: label.color.textColor || '#ffffff'
+    };
   };
 
   return (
@@ -63,6 +119,17 @@ export default function EmailList({
 
         {hasSelection ? (
           <>
+            {onBulkClassify && (
+              <button
+                onClick={onBulkClassify}
+                className="px-3 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors flex items-center gap-1.5 text-sm font-medium"
+                title="Phân loại tự động bằng AI"
+              >
+                <Sparkles className="w-4 h-4" />
+                Phân loại tự động
+              </button>
+            )}
+            <div className="w-px h-6 bg-gray-300 mx-1" />
             <button
               onClick={() => onBulkMarkAsRead(true)}
               className="p-2 hover:bg-gray-100 rounded-full"
@@ -186,14 +253,19 @@ export default function EmailList({
                   
                   return (
                     <div className="flex gap-1 mt-2 flex-wrap">
-                      {userLabels.slice(0, 3).map((label) => (
-                        <span
-                          key={label!.id}
-                          className={`px-2 py-0.5 rounded text-xs ${getLabelColorClass(label!)}`}
-                        >
-                          {label!.name}
-                        </span>
-                      ))}
+                      {userLabels.slice(0, 3).map((label) => {
+                        const colorClass = getLabelColorClass(label!);
+                        const inlineStyle = getLabelStyle(label!);
+                        return (
+                          <span
+                            key={label!.id}
+                            className={`px-2 py-0.5 rounded text-xs ${colorClass || 'text-white'}`}
+                            style={inlineStyle}
+                          >
+                            {label!.name}
+                          </span>
+                        );
+                      })}
                       {userLabels.length > 3 && (
                         <span className="text-xs text-gray-500">+{userLabels.length - 3}</span>
                       )}
