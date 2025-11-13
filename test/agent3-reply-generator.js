@@ -1,12 +1,12 @@
-// Test Agent 3 - Reply Generator
-// API Key: AIzaSyDo-qk0G6OW2lv7bpNk72zAT9tT1Dz-TFw
+// Agent 3: Reply Generator
+// Generates appropriate email replies based on user settings
 
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 const API_KEY = "AIzaSyDo-qk0G6OW2lv7bpNk72zAT9tT1Dz-TFw";
 const genAI = new GoogleGenerativeAI(API_KEY);
 
-// Sample user settings
+// User settings for personalized replies
 const userSettings = {
   name: "Quang Minh",
   role: "Software Developer",
@@ -15,8 +15,8 @@ const userSettings = {
   familyContext: "Close family, living with parents"
 };
 
-// Sample emails to reply to
-const sampleEmailsToReply = [
+// Sample emails to reply
+const sampleEmails = [
   {
     id: 1,
     from: "boss@company.com",
@@ -37,20 +37,13 @@ const sampleEmailsToReply = [
     subject: "Question about the new feature",
     body: "Hi Minh, I have some questions about the new authentication feature. Can we schedule a call this week to discuss?",
     category: "Work"
-  },
-  {
-    id: 4,
-    from: "friend@gmail.com",
-    subject: "Coffee catch-up?",
-    body: "Hey Minh! Long time no see. Want to grab coffee this weekend? Let me know when you're free!",
-    category: "Friends"
   }
 ];
 
 async function generateReply(email, userSettings) {
-  const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
-  const prompt = `You are a Reply Generator AI. Generate an appropriate email reply based on the user's settings and the original email.
+  const prompt = `You are a Reply Generator AI. Generate an appropriate email reply.
 
 User Settings:
 - Name: ${userSettings.name}
@@ -65,20 +58,19 @@ Subject: ${email.subject}
 Body: ${email.body}
 Category: ${email.category}
 
-Your task:
 Generate a suitable reply that:
-1. Matches the user's communication style
-2. Is appropriate for the email category (Work/Family/Friends)
-3. Addresses the content of the original email
+1. Matches user's communication style
+2. Is appropriate for the category (Work/Family/Friends)
+3. Addresses the email content
 4. Is concise but complete
 5. Uses proper email etiquette
 
-Respond in JSON format:
+Respond ONLY with valid JSON (no markdown):
 {
   "subject": "Re: Original subject",
-  "body": "The reply email body in HTML format",
+  "body": "Reply email body in HTML format",
   "tone": "professional|casual|friendly",
-  "reasoning": "Brief explanation of why you chose this reply style"
+  "reasoning": "Why this reply style was chosen"
 }`;
 
   try {
@@ -86,64 +78,55 @@ Respond in JSON format:
     const response = await result.response;
     const text = response.text();
     
-    // Extract JSON from response
     const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       return JSON.parse(jsonMatch[0]);
     }
-    return { error: "Could not parse JSON response", raw: text };
+    return { error: "Could not parse JSON", raw: text };
   } catch (error) {
     return { error: error.message };
   }
 }
 
 async function testAgent3() {
-  console.log("🤖 TESTING AGENT 3 - REPLY GENERATOR");
-  console.log("API Key:", API_KEY.substring(0, 20) + "...");
-  console.log("=" .repeat(80));
-  console.log("\n👤 User Settings:");
+  console.log("🤖 AGENT 3: REPLY GENERATOR");
+  console.log("=".repeat(80));
+  console.log("");
+  console.log("👤 User Settings:");
   console.log(`   Name: ${userSettings.name}`);
   console.log(`   Role: ${userSettings.role}`);
   console.log(`   Style: ${userSettings.communicationStyle}`);
   console.log("");
 
-  for (const email of sampleEmailsToReply) {
-    console.log(`\n📧 Email ${email.id}: ${email.subject}`);
-    console.log(`From: ${email.from}`);
-    console.log(`Category: ${email.category}`);
-    console.log("-".repeat(80));
+  for (const email of sampleEmails) {
+    console.log(`📧 Email ${email.id}: ${email.subject}`);
+    console.log(`   From: ${email.from}`);
+    console.log(`   Category: ${email.category}`);
     
-    const reply = await generateReply(email, userSettings);
+    const result = await generateReply(email, userSettings);
     
-    if (reply.error) {
-      console.log("❌ ERROR:", reply.error);
-      if (reply.raw) {
-        console.log("Raw response:", reply.raw);
-      }
+    if (result.error) {
+      console.log(`   ❌ Error: ${result.error}`);
     } else {
-      console.log("✅ Generated Reply:");
-      console.log(`   Subject: ${reply.subject}`);
-      console.log(`   Tone: ${reply.tone}`);
-      console.log(`   Reasoning: ${reply.reasoning}`);
-      console.log("\n   Body:");
+      console.log(`\n   ✅ Generated Reply:`);
+      console.log(`   Subject: ${result.subject}`);
+      console.log(`   Tone: ${result.tone}`);
+      console.log(`   Reasoning: ${result.reasoning}`);
+      console.log(`\n   Body:`);
       console.log("   " + "-".repeat(76));
-      // Strip HTML tags for console display
-      const plainBody = reply.body.replace(/<[^>]*>/g, '').replace(/\n\s*\n/g, '\n');
+      const plainBody = result.body.replace(/<[^>]*>/g, '');
       plainBody.split('\n').forEach(line => {
-        console.log(`   ${line}`);
+        if (line.trim()) console.log(`   ${line.trim()}`);
       });
       console.log("   " + "-".repeat(76));
     }
-    
     console.log("");
     
-    // Wait 1 second between requests to avoid rate limiting
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise(resolve => setTimeout(resolve, 1500));
   }
 
-  console.log("=" .repeat(80));
-  console.log("✅ Agent 3 testing completed!");
+  console.log("=".repeat(80));
+  console.log("✅ Agent 3 test completed!\n");
 }
 
-// Run the test
 testAgent3().catch(console.error);
