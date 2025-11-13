@@ -1,11 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
 import { Email, GmailLabel } from '../types';
-import { X, Star, Archive, Trash2, Reply, Forward, MoreVertical, Download } from 'lucide-react';
+import { X, Star, Archive, Trash2, Reply, Forward, MoreVertical, Download, Sparkles, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import EmailLabelMenu from './EmailLabelMenu';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import { generateReply, REPLY_STYLES, ReplyStyle } from '../services/replyGeneratorService';
 
 interface EmailDetailProps {
   email: Email;
@@ -36,6 +37,8 @@ export default function EmailDetail({
   const [replyMode, setReplyMode] = useState<'reply' | 'replyAll' | 'forward'>('reply');
   const [replyBody, setReplyBody] = useState('');
   const [isSending, setIsSending] = useState(false);
+  const [isGeneratingReply, setIsGeneratingReply] = useState(false);
+  const [selectedReplyStyle, setSelectedReplyStyle] = useState<ReplyStyle>('professional');
   const replyFormRef = useRef<HTMLDivElement>(null);
 
   const handleStartReply = (mode: 'reply' | 'replyAll' | 'forward') => {
@@ -52,6 +55,23 @@ export default function EmailDetail({
       }, 100);
     }
   }, [isReplying]);
+
+  const handleGenerateAIReply = async () => {
+    setIsGeneratingReply(true);
+    try {
+      const result = await generateReply({
+        email,
+        style: selectedReplyStyle
+      });
+      
+      setReplyBody(result.body);
+    } catch (error) {
+      console.error('Failed to generate reply:', error);
+      alert('Không thể tạo phản hồi tự động');
+    } finally {
+      setIsGeneratingReply(false);
+    }
+  };
 
   const handleSendReply = async () => {
     if (!replyBody.trim()) return;
@@ -285,6 +305,53 @@ ${email.body}
               {replyMode === 'replyAll' && email.cc && email.cc.length > 0 && (
                 <div><strong>Cc:</strong> {email.cc.join(', ')}</div>
               )}
+            </div>
+
+            {/* AI Reply Generator */}
+            <div className="mb-3 bg-white border border-blue-200 rounded-lg p-3">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-blue-600" />
+                  <span className="text-sm font-semibold text-gray-700">AI Reply Generator</span>
+                </div>
+                <button
+                  onClick={handleGenerateAIReply}
+                  disabled={isGeneratingReply}
+                  className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 transition-colors text-sm flex items-center gap-1.5"
+                >
+                  {isGeneratingReply ? (
+                    <>
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                      Đang tạo...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-3 h-3" />
+                      Tạo phản hồi
+                    </>
+                  )}
+                </button>
+              </div>
+              
+              <div className="grid grid-cols-4 gap-2">
+                {(Object.keys(REPLY_STYLES) as ReplyStyle[]).map((style) => (
+                  <button
+                    key={style}
+                    onClick={() => setSelectedReplyStyle(style)}
+                    className={`px-3 py-2 rounded-lg text-xs transition-all ${
+                      selectedReplyStyle === style
+                        ? 'bg-blue-100 border-2 border-blue-500 text-blue-900'
+                        : 'bg-gray-100 border-2 border-transparent text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    <div className="text-lg mb-1">{REPLY_STYLES[style].icon}</div>
+                    <div className="font-semibold">{REPLY_STYLES[style].name}</div>
+                    <div className="text-gray-500 mt-1" style={{ fontSize: '10px' }}>
+                      {REPLY_STYLES[style].description}
+                    </div>
+                  </button>
+                ))}
+              </div>
             </div>
             
             <ReactQuill 
