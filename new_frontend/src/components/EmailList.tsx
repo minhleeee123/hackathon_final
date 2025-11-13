@@ -67,6 +67,10 @@ export default function EmailList({
       
       // Purple shades
       '#a479e2': 'bg-purple-100 text-purple-800',
+      '#b99aff': 'bg-purple-200 text-purple-900',
+      
+      // Gray shades (Uncertain)
+      '#a0a0a0': 'bg-gray-200 text-gray-800',
     };
 
     // If exact match found, use it

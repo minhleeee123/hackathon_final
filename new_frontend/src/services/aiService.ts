@@ -12,13 +12,14 @@ export const CATEGORY_LABELS = {
   'Friends': 'Bạn bè',
   'Finance': 'Tài chính',
   'Spam': 'Spam & Quảng cáo',
-  'Promotion': 'Spam & Quảng cáo'
+  'Promotion': 'Spam & Quảng cáo',
+  'Uncertain': 'Cần xác minh'
 } as const;
 
 export const TASK_LABEL = '📋 Task for Agent 2';
 
 export interface ClassificationResult {
-  category: 'Work' | 'Family' | 'Friends' | 'Finance' | 'Spam' | 'Promotion';
+  category: 'Work' | 'Family' | 'Friends' | 'Finance' | 'Spam' | 'Promotion' | 'Uncertain';
   hasTask: boolean;
   reasoning: string;
   confidence: number;
@@ -46,19 +47,20 @@ Subject: ${email.subject}
 Body: ${email.body}
 
 Tasks:
-1. Classify into ONE category: "Work", "Family", "Friends", "Finance", "Spam", "Promotion"
+1. Classify into ONE category: "Work", "Family", "Friends", "Finance", "Spam", "Promotion", "Uncertain"
    - Work: Professional emails, meetings, projects, colleagues
    - Family: Personal emails from family members
    - Friends: Personal emails from friends
    - Finance: Bills, invoices, payments, banking, receipts, financial statements
    - Spam: Unwanted bulk emails
    - Promotion: Marketing emails, sales, advertisements
+   - Uncertain: When unable to confidently classify (use this if confidence < 0.7)
 2. Determine if it contains tasks/action items (true/false)
 3. Provide reasoning
 
 Respond ONLY with valid JSON (no markdown):
 {
-  "category": "Work|Family|Friends|Finance|Spam|Promotion",
+  "category": "Work|Family|Friends|Finance|Spam|Promotion|Uncertain",
   "hasTask": true|false,
   "reasoning": "Brief explanation",
   "confidence": 0.0-1.0

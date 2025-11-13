@@ -405,6 +405,13 @@ app.post('/api/ai/init-labels', async (req, res) => {
         } 
       },
       { 
+        name: 'Cần xác minh', 
+        color: { 
+          backgroundColor: '#b99aff',  // Light purple palette
+          textColor: '#ffffff'
+        } 
+      },
+      { 
         name: '📋 Task for Agent 2', 
         color: { 
           backgroundColor: '#ac2b16',  // Dark red palette
