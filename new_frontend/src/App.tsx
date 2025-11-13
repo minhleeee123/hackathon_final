@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Email, EmailFolder, GmailLabel, Task, TaskStatus } from './types';
+import { Email, EmailFolder, GmailLabel, Task, TaskStatus, PaymentItem } from './types';
 import { mockEmails } from './mockData';
 import Sidebar from './components/Sidebar';
 import EmailList from './components/EmailList';
@@ -8,6 +8,7 @@ import ComposeEmail from './components/ComposeEmail';
 import LabelManager from './components/LabelManager';
 import Header from './components/Header';
 import TaskManagementPage from './components/TaskManagementPage';
+import FinanceManagementPage from './components/FinanceManagementPage';
 import { 
   fetchGmailEmails, 
   fetchGmailLabels,
@@ -48,10 +49,13 @@ function App() {
   const [aiLabelsInitialized, setAiLabelsInitialized] = useState(false);
   
   // Task Management state
-  const [currentTab, setCurrentTab] = useState<'emails' | 'tasks'>('emails');
+  const [currentTab, setCurrentTab] = useState<'emails' | 'tasks' | 'finance'>('emails');
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isExtractingTasks, setIsExtractingTasks] = useState(false);
   const [taskExtractionProgress, setTaskExtractionProgress] = useState({ current: 0, total: 0 });
+
+  // Finance Management state
+  const [payments, setPayments] = useState<PaymentItem[]>([]);
 
   // Load Gmail emails and labels on mount
   useEffect(() => {
@@ -439,6 +443,25 @@ function App() {
     setTasks(prev => [newTask, ...prev]);
   };
 
+  // ===== Finance Management Functions =====
+  const handleCreatePayment = (newPayment: Omit<PaymentItem, 'id' | 'createdAt' | 'source'>) => {
+    const payment: PaymentItem = {
+      ...newPayment,
+      id: `payment_${Date.now()}`,
+      createdAt: new Date().toISOString(),
+      source: 'user'
+    };
+    setPayments(prev => [payment, ...prev]);
+  };
+
+  const handleUpdatePayment = (updatedPayment: PaymentItem) => {
+    setPayments(prev => prev.map(p => p.id === updatedPayment.id ? updatedPayment : p));
+  };
+
+  const handleDeletePayment = (paymentId: string) => {
+    setPayments(prev => prev.filter(p => p.id !== paymentId));
+  };
+
   const handleClassificationComplete = async (results: BulkClassificationResult[]) => {
     try {
       // Helper to find label ID by name
@@ -654,10 +677,25 @@ function App() {
               </span>
             )}
           </button>
+          <button
+            onClick={() => setCurrentTab('finance')}
+            className={`py-3 px-4 font-medium transition-colors border-b-2 flex items-center gap-2 ${
+              currentTab === 'finance'
+                ? 'text-blue-600 border-blue-600'
+                : 'text-gray-600 border-transparent hover:text-gray-900'
+            }`}
+          >
+            💰 Finance
+            {payments.length > 0 && (
+              <span className="bg-blue-600 text-white px-2 py-0.5 rounded-full text-xs">
+                {payments.length}
+              </span>
+            )}
+          </button>
           </div>
           
           <div className="text-xs text-gray-500 py-3">
-            {emails.length} emails | {tasks.length} tasks
+            {emails.length} emails | {tasks.length} tasks | {payments.length} payments
           </div>
         </div>
       </div>
@@ -717,13 +755,21 @@ function App() {
               />
             )}
           </>
-        ) : (
+        ) : currentTab === 'tasks' ? (
           <TaskManagementPage
             tasks={tasks}
             emails={emails}
             onUpdateTask={handleUpdateTask}
             onDeleteTask={handleDeleteTask}
             onCreateTask={handleCreateTask}
+          />
+        ) : (
+          <FinanceManagementPage
+            payments={payments}
+            emails={emails}
+            onUpdatePayment={handleUpdatePayment}
+            onDeletePayment={handleDeletePayment}
+            onCreatePayment={handleCreatePayment}
           />
         )}
       </div>

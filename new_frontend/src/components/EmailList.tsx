@@ -1,5 +1,5 @@
 import { Email, GmailLabel } from '../types';
-import { Star, Archive, Trash2, MoreVertical, RefreshCw, Sparkles, ListTodo } from 'lucide-react';
+import { Star, Archive, Trash2, MoreVertical, RefreshCw, Sparkles, ListTodo, DollarSign } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
 
@@ -16,10 +16,13 @@ interface EmailListProps {
   onBulkMarkAsRead: (isRead: boolean) => void;
   onBulkClassify?: () => void;
   onBulkExtractTasks?: () => void;
+  onBulkExtractPayments?: () => void;
   isClassifying?: boolean;
   isExtractingTasks?: boolean;
+  isExtractingPayments?: boolean;
   classificationProgress?: { current: number; total: number };
   taskExtractionProgress?: { current: number; total: number };
+  paymentExtractionProgress?: { current: number; total: number };
 }
 
 export default function EmailList({
@@ -35,10 +38,13 @@ export default function EmailList({
   onBulkMarkAsRead,
   onBulkClassify,
   onBulkExtractTasks,
+  onBulkExtractPayments,
   isClassifying = false,
   isExtractingTasks = false,
+  isExtractingPayments = false,
   classificationProgress = { current: 0, total: 0 },
   taskExtractionProgress = { current: 0, total: 0 },
+  paymentExtractionProgress = { current: 0, total: 0 },
 }: EmailListProps) {
   const hasSelection = selectedEmails.size > 0;
 

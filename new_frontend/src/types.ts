@@ -74,3 +74,22 @@ export interface Task {
   emailId?: string;
   createdAt: string;
 }
+
+export type PaymentStatus = 'unpaid' | 'paid';
+export type PaymentSource = 'ai' | 'user';
+
+export interface PaymentItem {
+  id: string;
+  title: string; // Tên khoản phí
+  amount: number; // Số tiền
+  currency: string; // Đơn vị tiền tệ (VND, USD, etc.)
+  dueDate?: string; // Hạn thanh toán
+  recipient?: string; // Người nhận/Đơn vị thu
+  paymentMethod?: string; // Phương thức thanh toán
+  description: string; // Mô tả chi tiết
+  status: PaymentStatus;
+  source: PaymentSource;
+  emailId?: string;
+  paidAt?: string; // Thời điểm thanh toán
+  createdAt: string;
+}
