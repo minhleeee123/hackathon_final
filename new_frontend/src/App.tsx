@@ -707,9 +707,14 @@ function App() {
         onCompose={() => setIsComposing(true)}
         useRealData={useRealData}
         onToggleDataSource={() => {
-          setUseRealData(!useRealData);
-          if (!useRealData) {
+          const newUseRealData = !useRealData;
+          setUseRealData(newUseRealData);
+          if (!newUseRealData) {
+            // Switch back to mock data
             setEmails(mockEmails);
+            setGmailLabels([]);
+            setSelectedEmails(new Set());
+            setSelectedEmailId(null);
           }
         }}
         onRefreshData={loadGmailData}

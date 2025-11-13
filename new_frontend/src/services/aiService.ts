@@ -1,8 +1,8 @@
 // AI Service - Agent 1 Email Classifier
 import { Email, PaymentItem } from '../types';
 
-const GEMINI_API_KEY = 'AIzaSyBKoPjBKVzNd7bKpx-y4fr7ZNSEeeSd6Ao';
-const GEMINI_MODEL = 'gemini-2.5-flash';
+const GEMINI_API_KEY = 'AIzaSyAl9P_ydHYwRyNVHaiB1_LLIEhAL5su70Y';
+const GEMINI_MODEL = 'gemini-2.0-flash'; // Stable model, 2.5-flash is getting 503 errors
 const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
 
 // Mapping categories to Gmail labels (Vietnamese)
