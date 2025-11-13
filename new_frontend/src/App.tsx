@@ -56,6 +56,8 @@ function App() {
 
   // Finance Management state
   const [payments, setPayments] = useState<PaymentItem[]>([]);
+  const [isExtractingPayments, setIsExtractingPayments] = useState(false);
+  const [paymentExtractionProgress, setPaymentExtractionProgress] = useState({ current: 0, total: 0 });
 
   // Load Gmail emails and labels on mount
   useEffect(() => {
@@ -462,6 +464,72 @@ function App() {
     setPayments(prev => prev.filter(p => p.id !== paymentId));
   };
 
+  // Payment Extraction handlers
+  const handleBulkExtractPayments = async () => {
+    setIsExtractingPayments(true);
+    setPaymentExtractionProgress({ current: 0, total: selectedEmails.size });
+
+    try {
+      const emailsToExtract = Array.from(selectedEmails)
+        .map(id => emails.find(e => e.id === id)!)
+        .filter(Boolean)
+        // Only extract from finance emails
+        .filter(email => {
+          const financeLabel = gmailLabels.find(l => l.name === 'Tài chính');
+          return financeLabel && email.labels.includes(financeLabel.id);
+        });
+
+      if (emailsToExtract.length === 0) {
+        alert('❌ Vui lòng chọn email có nhãn "Tài chính"!');
+        return;
+      }
+
+      const { extractPaymentInfo } = await import('./services/aiService');
+      let current = 0;
+
+      for (const email of emailsToExtract) {
+        current++;
+        setPaymentExtractionProgress({ current, total: emailsToExtract.length });
+
+        try {
+          const paymentInfo = await extractPaymentInfo(email);
+          
+          const payment: PaymentItem = {
+            id: `payment_${Date.now()}_${Math.random()}`,
+            ...paymentInfo,
+            status: 'unpaid',
+            source: 'ai',
+            emailId: email.id,
+            createdAt: new Date().toISOString()
+          };
+
+          setPayments(prev => [payment, ...prev]);
+        } catch (error) {
+          console.error(`Failed to extract payment from email ${email.id}:`, error);
+        }
+
+        // Wait 1 second between requests to avoid rate limiting
+        if (current < emailsToExtract.length) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
+
+      // Clear selection
+      setSelectedEmails(new Set());
+      
+      // Switch to Finance tab
+      setCurrentTab('finance');
+      
+      alert(`✅ Trích xuất thành công ${emailsToExtract.length} khoản thanh toán từ email tài chính!`);
+    } catch (error) {
+      console.error('Payment extraction failed:', error);
+      alert('❌ Có lỗi xảy ra khi trích xuất payment!');
+    } finally {
+      setIsExtractingPayments(false);
+      setPaymentExtractionProgress({ current: 0, total: 0 });
+    }
+  };
+
   const handleClassificationComplete = async (results: BulkClassificationResult[]) => {
     try {
       // Helper to find label ID by name
@@ -734,10 +802,13 @@ function App() {
               onBulkMarkAsRead={handleBulkMarkAsRead}
               onBulkClassify={handleBulkClassify}
               onBulkExtractTasks={handleBulkExtractTasks}
+              onBulkExtractPayments={handleBulkExtractPayments}
               isClassifying={isClassifying}
               isExtractingTasks={isExtractingTasks}
+              isExtractingPayments={isExtractingPayments}
               classificationProgress={classificationProgress}
               taskExtractionProgress={taskExtractionProgress}
+              paymentExtractionProgress={paymentExtractionProgress}
             />
 
             {selectedEmail && (

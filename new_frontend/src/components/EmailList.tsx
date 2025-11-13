@@ -201,6 +201,37 @@ export default function EmailList({
                 )}
               </>
             )}
+            {onBulkExtractPayments && (
+              <>
+                <button
+                  onClick={onBulkExtractPayments}
+                  disabled={isExtractingPayments || isClassifying || isExtractingTasks}
+                  className={`px-3 py-1.5 rounded transition-colors flex items-center gap-1.5 text-sm font-medium ${
+                    isExtractingPayments 
+                      ? 'bg-yellow-400 text-white cursor-not-allowed' 
+                      : 'bg-yellow-600 text-white hover:bg-yellow-700'
+                  }`}
+                  title="Trích xuất thông tin thanh toán từ email tài chính"
+                >
+                  <DollarSign className={`w-4 h-4 ${isExtractingPayments ? 'animate-spin' : ''}`} />
+                  {isExtractingPayments ? 'Đang trích xuất...' : 'Trích xuất Payment'}
+                </button>
+                
+                {isExtractingPayments && paymentExtractionProgress.total > 0 && (
+                  <div className="flex items-center gap-2 ml-2">
+                    <div className="w-32 bg-gray-200 rounded-full h-2">
+                      <div
+                        className="bg-yellow-600 h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${(paymentExtractionProgress.current / paymentExtractionProgress.total) * 100}%` }}
+                      />
+                    </div>
+                    <span className="text-xs text-gray-600">
+                      {paymentExtractionProgress.current}/{paymentExtractionProgress.total}
+                    </span>
+                  </div>
+                )}
+              </>
+            )}
             <div className="w-px h-6 bg-gray-300 mx-1" />
             <button
               onClick={() => onBulkMarkAsRead(true)}
