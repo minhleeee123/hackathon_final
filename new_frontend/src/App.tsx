@@ -594,7 +594,7 @@ function App() {
         }
 
         // Wait 1 second between requests to avoid rate limiting
-        if (current < emailsToExtract.length) {
+        if (current < emailsWithFinanceLabel.length) {
           await new Promise(resolve => setTimeout(resolve, 1000));
         }
       }
@@ -605,7 +605,7 @@ function App() {
       // Switch to Finance tab
       setCurrentTab('finance');
       
-      alert(`Trích xuất thành công ${emailsToExtract.length} khoản thanh toán từ email tài chính!`);
+      alert(`Trích xuất thành công ${emailsWithFinanceLabel.length} khoản thanh toán từ email tài chính!`);
     } catch (error) {
       console.error('Payment extraction failed:', error);
       alert('❌ Có lỗi xảy ra khi trích xuất payment!');
