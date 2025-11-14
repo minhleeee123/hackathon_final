@@ -15,7 +15,7 @@ export const CATEGORY_LABELS = {
   'Promotion': 'Spam & Quảng cáo'
 } as const;
 
-export const TASK_LABEL = '📋 Task for Agent 2';
+export const TASK_LABEL = 'Task for Agent 2';
 
 export interface ClassificationResult {
   category: 'Work' | 'Family' | 'Friends' | 'Finance' | 'Spam' | 'Promotion';

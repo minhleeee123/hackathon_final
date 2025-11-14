@@ -474,7 +474,7 @@ function App() {
         await loadGmailData();
       }
       
-      alert(`✅ Trích xuất thành công ${newTasks.length} task từ ${emailIdsWithTasks.length} email!`);
+      alert(`Trích xuất thành công ${newTasks.length} task từ ${emailIdsWithTasks.length} email!`);
     } catch (error) {
       console.error('Failed to save extracted tasks:', error);
     }
@@ -573,7 +573,7 @@ function App() {
       // Switch to Finance tab
       setCurrentTab('finance');
       
-      alert(`✅ Trích xuất thành công ${emailsToExtract.length} khoản thanh toán từ email tài chính!`);
+      alert(`Trích xuất thành công ${emailsToExtract.length} khoản thanh toán từ email tài chính!`);
     } catch (error) {
       console.error('Payment extraction failed:', error);
       alert('❌ Có lỗi xảy ra khi trích xuất payment!');

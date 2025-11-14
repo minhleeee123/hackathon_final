@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Email, GmailLabel } from '../types';
-import { X, Star, Archive, Trash2, Reply, Forward, MoreVertical, Download, Sparkles, Loader2 } from 'lucide-react';
+import { X, Star, Archive, Trash2, Reply, Forward, MoreVertical, Download, Sparkles, Loader2, Paperclip } from 'lucide-react';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import EmailLabelMenu from './EmailLabelMenu';
@@ -265,7 +265,7 @@ ${email.body}
                   className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50"
                 >
                   <div className="w-10 h-10 bg-blue-100 rounded flex items-center justify-center flex-shrink-0">
-                    <span className="text-lg">📎</span>
+                    <Paperclip className="w-5 h-5 text-blue-600" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-sm truncate">{attachment.name}</div>

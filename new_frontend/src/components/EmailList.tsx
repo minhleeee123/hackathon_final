@@ -1,5 +1,5 @@
 import { Email, GmailLabel } from '../types';
-import { Star, Archive, Trash2, MoreVertical, RefreshCw, Sparkles, ListTodo, DollarSign } from 'lucide-react';
+import { Star, Archive, Trash2, MoreVertical, RefreshCw, Sparkles, ListTodo, DollarSign, Paperclip } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { useTheme } from './ThemeProvider';
@@ -355,7 +355,7 @@ export default function EmailList({
                     {email.subject || '(No subject)'}
                   </span>
                   {email.hasAttachments && (
-                    <span className="text-xs">📎</span>
+                    <Paperclip className="w-3 h-3 text-gray-400" />
                   )}
                 </div>
 

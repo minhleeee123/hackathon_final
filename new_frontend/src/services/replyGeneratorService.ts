@@ -10,23 +10,19 @@ export type ReplyStyle = 'professional' | 'friendly' | 'concise' | 'detailed';
 export const REPLY_STYLES = {
   professional: {
     name: 'Chuyên nghiệp',
-    description: 'Trang trọng, lịch sự, phù hợp công việc',
-    icon: '💼'
+    description: 'Trang trọng, lịch sự, phù hợp công việc'
   },
   friendly: {
     name: 'Thân thiện',
-    description: 'Gần gũi, ấm áp, phù hợp bạn bè/gia đình',
-    icon: '😊'
+    description: 'Gần gũi, ấm áp, phù hợp bạn bè/gia đình'
   },
   concise: {
     name: 'Ngắn gọn',
-    description: 'Súc tích, đi thẳng vào vấn đề',
-    icon: '⚡'
+    description: 'Súc tích, đi thẳng vào vấn đề'
   },
   detailed: {
     name: 'Chi tiết',
-    description: 'Giải thích đầy đủ, cung cấp nhiều thông tin',
-    icon: '📝'
+    description: 'Giải thích đầy đủ, cung cấp nhiều thông tin'
   }
 } as const;
 

@@ -1,7 +1,7 @@
 import { useDrag } from 'react-dnd';
 import { Card } from './ui/card';
 import { Badge } from './ui/badge';
-import { Calendar, DollarSign, Building2, CreditCard, Mail } from 'lucide-react';
+import { Calendar, DollarSign, Building2, CreditCard, Mail, Bot, User } from 'lucide-react';
 import { PaymentItem } from '../types';
 
 interface PaymentCardProps {
@@ -63,8 +63,18 @@ export default function PaymentCard({ payment, email, onClick }: PaymentCardProp
             <h3 className="font-semibold text-gray-900 line-clamp-2">
               {payment.title}
             </h3>
-            <Badge variant={payment.source === 'ai' ? 'default' : 'secondary'} className="shrink-0">
-              {payment.source === 'ai' ? '🤖 AI' : '👤 User'}
+            <Badge variant={payment.source === 'ai' ? 'default' : 'secondary'} className="shrink-0 flex items-center gap-1">
+              {payment.source === 'ai' ? (
+                <>
+                  <Bot className="w-3 h-3" />
+                  <span>AI</span>
+                </>
+              ) : (
+                <>
+                  <User className="w-3 h-3" />
+                  <span>User</span>
+                </>
+              )}
             </Badge>
           </div>
 

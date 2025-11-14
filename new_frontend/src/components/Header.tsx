@@ -1,4 +1,4 @@
-import { Search, Menu, Settings, RefreshCw, Moon, Sun, User, Building2 } from 'lucide-react';
+import { Search, Menu, Settings, RefreshCw, Moon, Sun, User, Building2, Mail } from 'lucide-react';
 import { useTheme } from './ThemeProvider';
 import { AccountMode } from '../types';
 
@@ -40,7 +40,7 @@ export default function Header({
       </button>
 
       <div className="flex items-center gap-3">
-        <span className="text-2xl">📧</span>
+        <Mail className="w-6 h-6 text-blue-600 dark:text-emerald-400" />
         <h1 className="text-xl font-normal text-gray-700 dark:text-gray-200">Agent Mail</h1>
         
         {onToggleDataSource && (

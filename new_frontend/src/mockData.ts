@@ -76,8 +76,8 @@ export const mockEmails: Email[] = [
       avatar: '🛒'
     },
     to: ['me@gmail.com'],
-    subject: '🎉 SALE 50% - Khuyến mãi khủng cuối tuần',
-    body: `<h2>🎉 SALE KHỦNG CUỐI TUẦN</h2>
+    subject: 'SALE 50% - Khuyến mãi khủng cuối tuần',
+    body: `<h2>SALE KHỦNG CUỐI TUẦN</h2>
 <p>Đừng bỏ lỡ chương trình SALE khủng cuối tuần với hàng nghìn sản phẩm giảm giá lên đến <strong style="color: red;">50%</strong>!</p>
 <p><a href="#">Click ngay để mua sắm</a></p>`,
     snippet: 'Đừng bỏ lỡ chương trình SALE khủng cuối tuần với hàng nghìn sản phẩm giảm giá lên đến 50%!',
@@ -294,8 +294,8 @@ export const mockEmails: Email[] = [
       avatar: '🛍️'
     },
     to: ['me@gmail.com'],
-    subject: '⚡ Flash Sale 12h trưa - Giảm đến 90%',
-    body: `<h2>⚡ FLASH SALE 12H TRƯA</h2>
+    subject: 'Flash Sale 12h trưa - Giảm đến 90%',
+    body: `<h2>FLASH SALE 12H TRƯA</h2>
 <p>Săn sale liền tay với <strong>hàng nghìn sản phẩm giảm sốc đến 90%</strong>!</p>
 <p>Chỉ trong 2 giờ duy nhất! ⏰</p>
 <p><a href="#">Mua ngay</a></p>`,
@@ -319,7 +319,7 @@ export const mockEmails: Email[] = [
     body: `<p>Yo bro!</p>
 <p>Tối nay rảnh không? Team mình thiếu 1 người chơi ranked.</p>
 <p>Lên voice Discord lúc <strong>8h tối</strong> nhé!</p>
-<p>GG! 🎮</p>`,
+<p>GG!</p>`,
     snippet: 'Tối nay rảnh không? Team mình thiếu 1 người chơi ranked...',
     date: new Date('2025-11-08T17:00:00'),
     isRead: false,
@@ -391,7 +391,7 @@ export const mockEmails: Email[] = [
 <p>Bạn có mã giảm giá <strong>30%</strong> cho chuyến đi tiếp theo!</p>
 <p><strong>Mã:</strong> GRAB30NOV<br>
 <strong>Hạn sử dụng:</strong> 20/11/2025</p>
-<p>Đặt xe ngay! 🚗</p>`,
+<p>Đặt xe ngay!</p>`,
     snippet: 'Bạn có mã giảm giá 30% cho chuyến đi tiếp theo! Mã: GRAB30NOV',
     date: new Date('2025-11-08T08:00:00'),
     isRead: true,
@@ -501,7 +501,7 @@ export const mockEmails: Email[] = [
     body: `<p>Hey bro!</p>
 <p>Cuối tuần này có sự kiện <strong>Startup Weekend</strong> tại Innovation Hub.</p>
 <p>Mình đang tìm co-founder cho ý tưởng AI platform.</p>
-<p>Bạn có hứng thú không? Ping mình nhé! 🚀</p>`,
+<p>Bạn có hứng thú không? Ping mình nhé!</p>`,
     snippet: 'Cuối tuần này có Startup Weekend tại Innovation Hub. Tìm co-founder cho AI platform...',
     date: new Date('2025-11-06T16:00:00'),
     isRead: false,
@@ -567,13 +567,13 @@ export const mockEmails: Email[] = [
       avatar: '🎁'
     },
     to: ['me@gmail.com'],
-    subject: '🎉 Mã freeship toàn quốc cho bạn',
+    subject: 'Mã freeship toàn quốc cho bạn',
     body: `<p>Chào bạn!</p>
 <p>Tiki tặng bạn <strong>mã freeship toàn quốc</strong>!</p>
 <p><strong>Mã:</strong> FREESHIP50K<br>
 <strong>Áp dụng:</strong> Đơn từ 100K<br>
 <strong>HSD:</strong> 30/11/2025</p>
-<p>Mua sắm ngay! 🛒</p>`,
+<p>Mua sắm ngay!</p>`,
     snippet: 'Tiki tặng mã freeship toàn quốc! Mã: FREESHIP50K, đơn từ 100K',
     date: new Date('2025-11-05T14:00:00'),
     isRead: true,
@@ -702,9 +702,9 @@ export const mockEmails: Email[] = [
     to: ['friend@gmail.com'],
     subject: 'Happy Birthday! 🎂',
     body: `<p>Hey!</p>
-<p>Happy birthday! 🎉🎂 Wish you all the best!</p>
+<p>Happy birthday! Wish you all the best!</p>
 <p>Let's celebrate this weekend!</p>`,
-    snippet: 'Happy birthday! 🎉 Wish you all the best! Let\'s celebrate this weekend!',
+    snippet: 'Happy birthday! Wish you all the best! Let\'s celebrate this weekend!',
     date: new Date('2025-11-10T09:00:00'),
     isRead: true,
     isStarred: false,
@@ -784,7 +784,7 @@ export const mockGmailLabels: GmailLabel[] = [
   },
   {
     id: 'label_task',
-    name: '📋 Task for Agent 2',
+    name: 'Task for Agent 2',
     type: 'user',
     color: {
       backgroundColor: '#16a765',
