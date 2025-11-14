@@ -831,7 +831,7 @@ function App() {
             onClick={() => setCurrentTab('emails')}
             className={`py-3 px-4 font-medium transition-colors border-b-2 ${
               currentTab === 'emails'
-                ? 'text-blue-600 dark:text-emerald-400 border-blue-600 dark:border-emerald-500'
+                ? 'text-blue-600 dark:text-blue-400 border-blue-600 dark:border-gray-700'
                 : 'text-gray-600 dark:text-gray-400 border-transparent hover:text-gray-900 dark:hover:text-gray-100'
             }`}
           >
@@ -841,7 +841,7 @@ function App() {
             onClick={() => setCurrentTab('tasks')}
             className={`py-3 px-4 font-medium transition-colors border-b-2 flex items-center gap-2 ${
               currentTab === 'tasks'
-                ? 'text-blue-600 dark:text-emerald-400 border-blue-600 dark:border-emerald-500'
+                ? 'text-blue-600 dark:text-blue-400 border-blue-600 dark:border-gray-700'
                 : 'text-gray-600 dark:text-gray-400 border-transparent hover:text-gray-900 dark:hover:text-gray-100'
             }`}
           >
@@ -856,7 +856,7 @@ function App() {
             onClick={() => setCurrentTab('finance')}
             className={`py-3 px-4 font-medium transition-colors border-b-2 flex items-center gap-2 ${
               currentTab === 'finance'
-                ? 'text-blue-600 dark:text-emerald-400 border-blue-600 dark:border-emerald-500'
+                ? 'text-blue-600 dark:text-blue-400 border-blue-600 dark:border-gray-700'
                 : 'text-gray-600 dark:text-gray-400 border-transparent hover:text-gray-900 dark:hover:text-gray-100'
             }`}
           >
@@ -872,7 +872,7 @@ function App() {
               onClick={() => setCurrentTab('contracts')}
               className={`py-3 px-4 font-medium transition-colors border-b-2 flex items-center gap-2 ${
                 currentTab === 'contracts'
-                  ? 'text-blue-600 dark:text-emerald-400 border-blue-600 dark:border-emerald-500'
+                  ? 'text-blue-600 dark:text-blue-400 border-blue-600 dark:border-gray-700'
                   : 'text-gray-600 dark:text-gray-400 border-transparent hover:text-gray-900 dark:hover:text-gray-100'
               }`}
             >

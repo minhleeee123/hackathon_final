@@ -35,9 +35,9 @@ export default function FinanceManagementPage({
   const getStatusColor = (status: PaymentStatus): string => {
     switch (status) {
       case 'unpaid':
-        return 'bg-red-100 text-red-700 border-red-200';
+        return 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800';
       case 'paid':
-        return 'bg-green-100 text-green-700 border-green-200';
+        return 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800';
     }
   };
 
@@ -105,22 +105,22 @@ export default function FinanceManagementPage({
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className="flex-1 flex flex-col bg-gray-50 overflow-hidden">
+      <div className="flex-1 flex flex-col bg-gray-50 dark:bg-gray-900 overflow-hidden">
         <div className="p-6 space-y-6 overflow-y-auto">
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-semibold text-gray-900">Quản lý Tài chính</h2>
+              <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">Quản lý Tài chính</h2>
               <div className="flex items-center gap-4 mt-2">
                 <div className="flex items-center gap-2 text-sm">
-                  <DollarSign className="w-4 h-4 text-red-600" />
-                  <span className="text-gray-600">Chưa thanh toán:</span>
-                  <span className="font-semibold text-red-600">{formatAmount(totalUnpaid)}</span>
+                  <DollarSign className="w-4 h-4 text-red-600 dark:text-red-400" />
+                  <span className="text-gray-600 dark:text-gray-400">Chưa thanh toán:</span>
+                  <span className="font-semibold text-red-600 dark:text-red-400">{formatAmount(totalUnpaid)}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                  <TrendingUp className="w-4 h-4 text-green-600" />
-                  <span className="text-gray-600">Đã thanh toán:</span>
-                  <span className="font-semibold text-green-600">{formatAmount(totalPaid)}</span>
+                  <TrendingUp className="w-4 h-4 text-green-600 dark:text-green-400" />
+                  <span className="text-gray-600 dark:text-gray-400">Đã thanh toán:</span>
+                  <span className="font-semibold text-green-600 dark:text-green-400">{formatAmount(totalPaid)}</span>
                 </div>
               </div>
             </div>

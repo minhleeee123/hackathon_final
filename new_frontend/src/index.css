@@ -90,7 +90,7 @@ body {
 }
 
 .dark .email-item:hover {
-  box-shadow: inset 1px 0 0 #10b981, inset -1px 0 0 #10b981, 0 1px 2px 0 rgba(16,185,129,.5), 0 1px 3px 1px rgba(16,185,129,.3);
+  box-shadow: inset 1px 0 0 #374151, inset -1px 0 0 #374151, 0 1px 2px 0 rgba(0,0,0,.3), 0 1px 3px 1px rgba(0,0,0,.2);
 }
 
 .email-item.selected {
@@ -98,7 +98,7 @@ body {
 }
 
 .dark .email-item.selected {
-  box-shadow: 0 0 10px rgba(16,185,129,.5);
+  box-shadow: 0 0 10px rgba(0,0,0,.5);
 }
 
 .email-item.unread {

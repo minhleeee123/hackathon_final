@@ -44,7 +44,7 @@ export default function Header({
         <h1 className="text-xl font-normal text-gray-700 dark:text-gray-200">Agent Mail</h1>
         
         {onToggleDataSource && (
-          <div className="flex items-center gap-2 ml-2 pl-3 border-l border-gray-300 dark:border-emerald-500">
+          <div className="flex items-center gap-2 ml-2 pl-3 border-l border-gray-300 dark:border-gray-800">
             <button
               onClick={onToggleDataSource}
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${

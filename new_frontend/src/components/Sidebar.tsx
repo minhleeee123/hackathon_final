@@ -178,7 +178,7 @@ export default function Sidebar({ selectedFolder, selectedLabel, gmailLabels, on
           );
         })}
 
-        <div className="my-2 border-t border-gray-200 dark:border-emerald-500" />
+        <div className="my-2 border-t border-gray-200 dark:border-gray-800" />
 
         <div className="px-4 py-2 flex items-center justify-between">
           <div className="text-xs font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">

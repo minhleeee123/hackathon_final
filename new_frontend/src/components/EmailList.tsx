@@ -346,7 +346,7 @@ export default function EmailList({
             <div
               key={email.id}
               className={`
-                email-item flex items-center gap-3 px-4 py-3 border-b border-gray-100 dark:border-emerald-500/30 cursor-pointer transition-all
+                email-item flex items-center gap-3 px-4 py-3 border-b border-gray-100 dark:border-gray-800 cursor-pointer transition-all
                 ${selectedEmailId === email.id ? 'bg-blue-50 dark:bg-blue-900/20' : ''}
                 ${selectedEmails.has(email.id) ? 'selected' : ''}
                 ${!email.isRead ? 'unread' : ''}

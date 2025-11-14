@@ -35,11 +35,11 @@ export default function TaskManagementPage({
   const getStatusColor = (status: TaskStatus): string => {
     switch (status) {
       case 'to-do':
-        return 'bg-gray-100 text-gray-700 border-gray-200';
+        return 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700';
       case 'in-process':
-        return 'bg-blue-100 text-blue-700 border-blue-200';
+        return 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800';
       case 'completed':
-        return 'bg-green-100 text-green-700 border-green-200';
+        return 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800';
     }
   };
 
@@ -94,12 +94,12 @@ export default function TaskManagementPage({
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className="flex-1 flex flex-col bg-gray-50 overflow-hidden">
+      <div className="flex-1 flex flex-col bg-gray-50 dark:bg-gray-900 overflow-hidden">
         <div className="p-6 space-y-6 overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-semibold text-gray-900">Quản lý Task</h2>
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">Quản lý Task</h2>
           </div>
           <Button onClick={() => setIsCreating(true)} className="gap-2">
             <Plus className="w-4 h-4" />
