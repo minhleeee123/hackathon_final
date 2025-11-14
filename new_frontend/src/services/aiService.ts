@@ -110,9 +110,11 @@ JSON: {"category":"","hasTask":false,"reasoning":""}`;
  */
 export async function classifyEmailsBulk(
   emails: Email[],
-  onProgress?: (current: number, total: number, emailId: string) => void
+  onProgress?: (current: number, total: number, emailId: string) => void,
+  useFastMode: boolean = false
 ): Promise<BulkClassificationResult[]> {
   const results: BulkClassificationResult[] = [];
+  const delayMs = useFastMode ? 200 : 1000; // 200ms for mock data
 
   for (let i = 0; i < emails.length; i++) {
     const email = emails[i];
@@ -122,7 +124,27 @@ export async function classifyEmailsBulk(
     }
 
     try {
-      const classification = await classifyEmail(email);
+      // For mock data (fast mode), use existing labels instead of calling API
+      let classification: ClassificationResult;
+      
+      if (useFastMode && email.labels && email.labels.length > 0) {
+        // Mock: Just use the first label as category
+        const mockCategories: Array<keyof typeof CATEGORY_LABELS> = ['Work', 'Family', 'Friends', 'Finance', 'Spam'];
+        const randomCategory = mockCategories[i % mockCategories.length];
+        
+        classification = {
+          category: randomCategory,
+          hasTask: email.labels.includes('label_task') || Math.random() > 0.7,
+          reasoning: 'Mock classification for demo',
+          gmailLabel: CATEGORY_LABELS[randomCategory],
+          needsTaskLabel: email.labels.includes('label_task') || Math.random() > 0.7,
+          isSpam: randomCategory === 'Spam' || randomCategory === 'Promotion'
+        };
+      } else {
+        // Real API call
+        classification = await classifyEmail(email);
+      }
+      
       results.push({
         emailId: email.id,
         classification,
@@ -137,9 +159,9 @@ export async function classifyEmailsBulk(
       });
     }
 
-    // Wait 1 second between requests to avoid rate limiting
+    // Wait between requests
     if (i < emails.length - 1) {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, delayMs));
     }
   }
 

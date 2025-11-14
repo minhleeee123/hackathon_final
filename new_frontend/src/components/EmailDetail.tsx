@@ -39,6 +39,8 @@ export default function EmailDetail({
   const [isSending, setIsSending] = useState(false);
   const [isGeneratingReply, setIsGeneratingReply] = useState(false);
   const [selectedReplyStyle, setSelectedReplyStyle] = useState<ReplyStyle>('professional');
+  const [showCustomPrompt, setShowCustomPrompt] = useState(false);
+  const [customPrompt, setCustomPrompt] = useState('');
   const replyFormRef = useRef<HTMLDivElement>(null);
 
   const handleStartReply = (mode: 'reply' | 'replyAll' | 'forward') => {
@@ -61,7 +63,8 @@ export default function EmailDetail({
     try {
       const result = await generateReply({
         email,
-        style: selectedReplyStyle
+        style: selectedReplyStyle,
+        customPrompt: customPrompt.trim() || undefined
       });
       
       setReplyBody(result.body);
@@ -333,7 +336,7 @@ ${email.body}
                 </button>
               </div>
               
-              <div className="grid grid-cols-4 gap-2">
+              <div className="grid grid-cols-4 gap-2 mb-3">
                 {(Object.keys(REPLY_STYLES) as ReplyStyle[]).map((style) => (
                   <button
                     key={style}
@@ -351,6 +354,25 @@ ${email.body}
                     </div>
                   </button>
                 ))}
+              </div>
+
+              {/* Custom Prompt Section */}
+              <div className="border-t pt-2">
+                <button
+                  onClick={() => setShowCustomPrompt(!showCustomPrompt)}
+                  className="text-xs text-blue-600 hover:text-blue-800 flex items-center gap-1"
+                >
+                  {showCustomPrompt ? '▼' : '▶'} Nhập prompt tùy chỉnh
+                </button>
+                {showCustomPrompt && (
+                  <textarea
+                    value={customPrompt}
+                    onChange={(e) => setCustomPrompt(e.target.value)}
+                    placeholder="Nhập hướng dẫn bổ sung cho AI (ví dụ: Thêm thông tin về lịch họp, đề cập đến deadline cụ thể...)"
+                    className="w-full mt-2 px-3 py-2 border border-gray-300 rounded-lg text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    rows={3}
+                  />
+                )}
               </div>
             </div>
             

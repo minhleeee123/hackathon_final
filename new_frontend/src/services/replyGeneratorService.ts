@@ -34,6 +34,7 @@ export interface GenerateReplyRequest {
   email: Email;
   style: ReplyStyle;
   userContext?: string; // Optional context about user (name, role, etc.)
+  customPrompt?: string; // Custom instructions from user
 }
 
 export interface GenerateReplyResult {
@@ -49,7 +50,8 @@ export interface GenerateReplyResult {
 export async function generateReply({
   email,
   style,
-  userContext = ''
+  userContext = '',
+  customPrompt = ''
 }: GenerateReplyRequest): Promise<GenerateReplyResult> {
   const styleInstructions = {
     professional: 'Use formal, professional tone. Include proper salutations and closings. Be respectful and courteous.',
@@ -68,6 +70,7 @@ Body: ${email.body}
 ${userContext ? `User Context:\n${userContext}\n` : ''}
 Reply Style: ${REPLY_STYLES[style].name}
 Instructions: ${styleInstructions[style]}
+${customPrompt ? `\nAdditional Custom Instructions:\n${customPrompt}\n` : ''}
 
 Generate a reply email with:
 1. Appropriate subject line (Re: ... or new subject if needed)
@@ -75,6 +78,7 @@ Generate a reply email with:
 3. Match the tone and style requested
 4. Address main points from original email
 5. Be helpful and actionable
+${customPrompt ? '6. Follow the custom instructions provided above' : ''}
 
 Respond ONLY with valid JSON (no markdown):
 {

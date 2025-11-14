@@ -27,7 +27,7 @@ export default function Header({
       className="h-16 flex items-center px-4 gap-4 flex-shrink-0 transition-colors border-b" 
       style={{ 
         borderColor: 'var(--border)', 
-        backgroundColor: theme === 'dark' ? '#0f172a' : '#ffffff'
+        backgroundColor: theme === 'dark' ? '#0f172a' : '#f5f3ff'
       }}
     >
       <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors">

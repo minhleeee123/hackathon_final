@@ -2,6 +2,7 @@ import { Email, GmailLabel } from '../types';
 import { Star, Archive, Trash2, MoreVertical, RefreshCw, Sparkles, ListTodo, DollarSign } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
+import { useTheme } from './ThemeProvider';
 
 interface EmailListProps {
   emails: Email[];
@@ -17,6 +18,7 @@ interface EmailListProps {
   onBulkClassify?: () => void;
   onBulkExtractTasks?: () => void;
   onBulkExtractPayments?: () => void;
+  onMoveSpamToTrash?: () => void;
   isClassifying?: boolean;
   isExtractingTasks?: boolean;
   isExtractingPayments?: boolean;
@@ -39,6 +41,7 @@ export default function EmailList({
   onBulkClassify,
   onBulkExtractTasks,
   onBulkExtractPayments,
+  onMoveSpamToTrash,
   isClassifying = false,
   isExtractingTasks = false,
   isExtractingPayments = false,
@@ -46,6 +49,7 @@ export default function EmailList({
   taskExtractionProgress = { current: 0, total: 0 },
   paymentExtractionProgress = { current: 0, total: 0 },
 }: EmailListProps) {
+  const { theme } = useTheme();
   const hasSelection = selectedEmails.size > 0;
 
   // Helper to get label color class
@@ -127,11 +131,11 @@ export default function EmailList({
   };
 
   return (
-    <div className="flex-1 flex flex-col overflow-hidden transition-colors" style={{ backgroundColor: 'var(--background)' }}>
+    <div className="flex-1 flex flex-col overflow-hidden transition-colors" style={{ backgroundColor: theme === 'dark' ? 'var(--background)' : '#f5f3ff' }}>
       {/* Toolbar */}
       <div 
-        className="h-12 flex items-center px-4 gap-2 flex-shrink-0 transition-colors bg-white dark:bg-[#0f172a]" 
-        style={{ borderBottom: '1px solid var(--border)' }}
+        className="h-12 flex items-center px-4 gap-2 flex-shrink-0 transition-colors" 
+        style={{ borderBottom: '1px solid var(--border)', backgroundColor: theme === 'dark' ? '#0f172a' : '#f5f3ff' }}
       >
         <input
           type="checkbox"
@@ -234,6 +238,16 @@ export default function EmailList({
                   </div>
                 )}
               </>
+            )}
+            {onMoveSpamToTrash && (
+              <button
+                onClick={onMoveSpamToTrash}
+                className="px-3 py-1.5 rounded transition-colors flex items-center gap-1.5 text-sm font-medium bg-red-600 text-white hover:bg-red-700"
+                title="Chuyển tất cả email spam vào thùng rác"
+              >
+                <Trash2 className="w-4 h-4" />
+                Spam → Thùng rác
+              </button>
             )}
             <div className="w-px h-6 bg-gray-300 dark:bg-emerald-500 mx-1" />
             <button

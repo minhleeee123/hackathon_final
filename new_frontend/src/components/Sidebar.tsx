@@ -126,7 +126,7 @@ export default function Sidebar({ selectedFolder, selectedLabel, gmailLabels, on
       className="w-64 flex flex-col flex-shrink-0 transition-colors border-r" 
       style={{ 
         borderColor: 'var(--border)', 
-        backgroundColor: theme === 'dark' ? '#0f172a' : '#ffffff'
+        backgroundColor: theme === 'dark' ? '#0f172a' : '#f5f3ff'
       }}
     >
       <div className="p-4">
@@ -157,10 +157,10 @@ export default function Sidebar({ selectedFolder, selectedLabel, gmailLabels, on
                   : theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
                 }
               `}
-              style={isSelected ? { backgroundColor: theme === 'dark' ? '#8b5cf6' : '#fecaca' } : {}}
+              style={isSelected ? { backgroundColor: '#8b5cf6' } : {}}
               onMouseEnter={(e) => {
                 if (!isSelected) {
-                  e.currentTarget.style.backgroundColor = theme === 'dark' ? '#4435e3' : '#f3f4f6';
+                  e.currentTarget.style.backgroundColor = theme === 'dark' ? '#4435e3' : '#e0e7ff';
                 }
               }}
               onMouseLeave={(e) => {
@@ -210,10 +210,10 @@ export default function Sidebar({ selectedFolder, selectedLabel, gmailLabels, on
                   : theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
                 }
               `}
-              style={selectedLabel === label.id ? { backgroundColor: theme === 'dark' ? '#8b5cf6' : '#fecaca' } : {}}
+              style={selectedLabel === label.id ? { backgroundColor: '#8b5cf6' } : {}}
               onMouseEnter={(e) => {
                 if (selectedLabel !== label.id) {
-                  e.currentTarget.style.backgroundColor = theme === 'dark' ? '#4435e3' : '#f3f4f6';
+                  e.currentTarget.style.backgroundColor = theme === 'dark' ? '#4435e3' : '#e0e7ff';
                 }
               }}
               onMouseLeave={(e) => {

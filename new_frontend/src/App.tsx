@@ -9,6 +9,7 @@ import LabelManager from './components/LabelManager';
 import Header from './components/Header';
 import TaskManagementPage from './components/TaskManagementPage';
 import FinanceManagementPage from './components/FinanceManagementPage';
+import { useTheme } from './components/ThemeProvider';
 import { 
   fetchGmailEmails, 
   fetchGmailLabels,
@@ -26,6 +27,7 @@ import { BulkClassificationResult, TASK_LABEL, classifyEmailsBulk } from './serv
 import { extractTasksBulk, TaskExtractionResult } from './services/taskExtractorService';
 
 function App() {
+  const { theme } = useTheme();
   const [emails, setEmails] = useState<Email[]>(mockEmails);
   const [gmailLabels, setGmailLabels] = useState<GmailLabel[]>(mockGmailLabels);
   const [selectedFolder, setSelectedFolder] = useState<EmailFolder>('inbox');
@@ -47,6 +49,7 @@ function App() {
   const [isClassifying, setIsClassifying] = useState(false);
   const [classificationProgress, setClassificationProgress] = useState({ current: 0, total: 0 });
   const [aiLabelsInitialized, setAiLabelsInitialized] = useState(false);
+  const [mockLabelsVisible, setMockLabelsVisible] = useState(false); // Track if mock labels should be shown
   
   // Task Management state
   const [currentTab, setCurrentTab] = useState<'emails' | 'tasks' | 'finance'>('emails');
@@ -101,7 +104,12 @@ function App() {
 
   const selectedEmail = emails.find(e => e.id === selectedEmailId);
 
-  const filteredEmails = emails.filter(email => {
+  // For mock data demo: hide labels until classification is run
+  const displayEmails = useRealData || mockLabelsVisible 
+    ? emails 
+    : emails.map(email => ({ ...email, labels: [] }));
+
+  const filteredEmails = displayEmails.filter(email => {
     // Filter by label first
     if (selectedLabel) {
       if (!email.labels.includes(selectedLabel)) return false;
@@ -316,6 +324,34 @@ function App() {
     setSelectedEmails(new Set());
   };
 
+  const handleMoveSpamToTrash = () => {
+    const spamLabelName = 'Spam & Quảng cáo';
+    const spamEmails = emails.filter(email => 
+      email.labels.some(label => {
+        const labelObj = gmailLabels.find(l => l.id === label);
+        return labelObj?.name === spamLabelName;
+      })
+    );
+    
+    if (spamEmails.length === 0) {
+      alert('Không tìm thấy email nào có tag "Spam & Quảng cáo"');
+      return;
+    }
+
+    const confirmMove = window.confirm(`Bạn có chắc chắn muốn chuyển ${spamEmails.length} email spam vào thùng rác?`);
+    
+    if (confirmMove) {
+      setEmails(prev => prev.map(email => {
+        const isSpam = email.labels.some(label => {
+          const labelObj = gmailLabels.find(l => l.id === label);
+          return labelObj?.name === spamLabelName;
+        });
+        return isSpam ? { ...email, folder: 'trash' } : email;
+      }));
+      alert(`Đã chuyển ${spamEmails.length} email spam vào thùng rác`);
+    }
+  };
+
   // AI Classification handlers
   const handleBulkClassify = async () => {
     setIsClassifying(true);
@@ -330,7 +366,8 @@ function App() {
         emailsToClassify,
         (current, total) => {
           setClassificationProgress({ current, total });
-        }
+        },
+        !useRealData // useFastMode for mock data
       );
 
       await handleClassificationComplete(results);
@@ -345,15 +382,16 @@ function App() {
   // Task Extraction handlers
   const handleBulkExtractTasks = async () => {
     setIsExtractingTasks(true);
-    setTaskExtractionProgress({ current: 0, total: selectedEmails.size });
+    
+    // Find all emails with Task label (label_task)
+    const taskLabelId = 'label_task';
+    const emailsWithTaskLabel = emails.filter(email => email.labels.includes(taskLabelId));
+    
+    setTaskExtractionProgress({ current: 0, total: emailsWithTaskLabel.length });
 
     try {
-      const emailsToExtract = Array.from(selectedEmails)
-        .map(id => emails.find(e => e.id === id)!)
-        .filter(Boolean);
-
       const results = await extractTasksBulk(
-        emailsToExtract,
+        emailsWithTaskLabel,
         (current, total) => {
           setTaskExtractionProgress({ current, total });
         }
@@ -462,29 +500,26 @@ function App() {
   // Payment Extraction handlers
   const handleBulkExtractPayments = async () => {
     setIsExtractingPayments(true);
-    setPaymentExtractionProgress({ current: 0, total: selectedEmails.size });
+    
+    // Find all emails with Finance label (label_finance)
+    const financeLabelId = 'label_finance';
+    const emailsWithFinanceLabel = emails.filter(email => email.labels.includes(financeLabelId));
+    
+    if (emailsWithFinanceLabel.length === 0) {
+      alert('❌ Không có email nào có nhãn "Tài chính"!');
+      setIsExtractingPayments(false);
+      return;
+    }
+    
+    setPaymentExtractionProgress({ current: 0, total: emailsWithFinanceLabel.length });
 
     try {
-      const emailsToExtract = Array.from(selectedEmails)
-        .map(id => emails.find(e => e.id === id)!)
-        .filter(Boolean)
-        // Only extract from finance emails
-        .filter(email => {
-          const financeLabel = gmailLabels.find(l => l.name === 'Tài chính');
-          return financeLabel && email.labels.includes(financeLabel.id);
-        });
-
-      if (emailsToExtract.length === 0) {
-        alert('❌ Vui lòng chọn email có nhãn "Tài chính"!');
-        return;
-      }
-
       const { extractPaymentInfo } = await import('./services/aiService');
       let current = 0;
 
-      for (const email of emailsToExtract) {
+      for (const email of emailsWithFinanceLabel) {
         current++;
-        setPaymentExtractionProgress({ current, total: emailsToExtract.length });
+        setPaymentExtractionProgress({ current, total: emailsWithFinanceLabel.length });
 
         try {
           const paymentInfo = await extractPaymentInfo(email);
@@ -527,6 +562,14 @@ function App() {
 
   const handleClassificationComplete = async (results: BulkClassificationResult[]) => {
     try {
+      // For mock data, just show labels immediately without processing
+      if (!useRealData) {
+        setMockLabelsVisible(true);
+        setSelectedEmails(new Set());
+        return;
+      }
+
+      // Real data processing
       // Helper to find label ID by name
       const findLabelId = (labelName: string): string | null => {
         const label = gmailLabels.find(l => l.name === labelName);
@@ -570,9 +613,9 @@ function App() {
           console.log(`  -> Total labels to apply:`, labelIds);
           
           // Apply labels
-          if (labelIds.length > 0 && useRealData) {
+          if (labelIds.length > 0) {
             await handleAddLabel(result.emailId, labelIds);
-          } else if (labelIds.length === 0) {
+          } else {
             console.warn(`No labels found for email ${result.emailId}`);
           }
         }
@@ -580,9 +623,7 @@ function App() {
 
       // Clear selection and reload
       setSelectedEmails(new Set());
-      if (useRealData) {
-        await loadGmailData();
-      }
+      await loadGmailData();
       
     } catch (error) {
       console.error('Failed to apply classification labels:', error);
@@ -695,7 +736,7 @@ function App() {
   const unreadCount = emails.filter(e => e.folder === 'inbox' && !e.isRead).length;
 
   return (
-    <div className="h-screen flex flex-col" style={{ backgroundColor: 'var(--background)', color: 'var(--foreground)' }}>
+    <div className="h-screen flex flex-col transition-colors" style={{ backgroundColor: theme === 'dark' ? 'var(--background)' : '#f5f3ff', color: 'var(--foreground)' }}>
       <Header 
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
@@ -713,6 +754,7 @@ function App() {
             setGmailLabels(mockGmailLabels);
             setSelectedEmails(new Set());
             setSelectedEmailId(null);
+            setMockLabelsVisible(false); // Reset label visibility for demo
           }
         }}
         onRefreshData={loadGmailData}
@@ -720,7 +762,7 @@ function App() {
       />
 
       {/* Tab Navigation */}
-      <div className="transition-colors bg-white dark:bg-[#0f172a]" style={{ borderBottom: '1px solid var(--border)' }}>
+      <div className="transition-colors" style={{ borderBottom: '1px solid var(--border)', backgroundColor: theme === 'dark' ? '#0f172a' : '#f5f3ff' }}>
         <div className="flex items-center justify-between px-6">
           <div className="flex gap-6">
           <button
@@ -731,7 +773,7 @@ function App() {
                 : 'text-gray-600 dark:text-gray-400 border-transparent hover:text-gray-900 dark:hover:text-gray-100'
             }`}
           >
-            📧 Emails
+            Emails
           </button>
           <button
             onClick={() => setCurrentTab('tasks')}
@@ -741,7 +783,7 @@ function App() {
                 : 'text-gray-600 dark:text-gray-400 border-transparent hover:text-gray-900 dark:hover:text-gray-100'
             }`}
           >
-            ✅ Tasks
+            Tasks
             {tasks.length > 0 && (
               <span className="bg-blue-600 text-white px-2 py-0.5 rounded-full text-xs">
                 {tasks.length}
@@ -756,7 +798,7 @@ function App() {
                 : 'text-gray-600 dark:text-gray-400 border-transparent hover:text-gray-900 dark:hover:text-gray-100'
             }`}
           >
-            💰 Finance
+            Finance
             {payments.length > 0 && (
               <span className="bg-blue-600 text-white px-2 py-0.5 rounded-full text-xs">
                 {payments.length}
@@ -806,6 +848,7 @@ function App() {
               onBulkClassify={handleBulkClassify}
               onBulkExtractTasks={handleBulkExtractTasks}
               onBulkExtractPayments={handleBulkExtractPayments}
+              onMoveSpamToTrash={handleMoveSpamToTrash}
               isClassifying={isClassifying}
               isExtractingTasks={isExtractingTasks}
               isExtractingPayments={isExtractingPayments}
