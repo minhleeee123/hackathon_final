@@ -129,7 +129,10 @@ export default function EmailList({
   return (
     <div className="flex-1 flex flex-col overflow-hidden transition-colors" style={{ backgroundColor: 'var(--background)' }}>
       {/* Toolbar */}
-      <div className="h-12 flex items-center px-4 gap-2 flex-shrink-0 transition-colors" style={{ borderBottom: '1px solid var(--border)', backgroundColor: '#0f172a' }}>
+      <div 
+        className="h-12 flex items-center px-4 gap-2 flex-shrink-0 transition-colors bg-white dark:bg-[#0f172a]" 
+        style={{ borderBottom: '1px solid var(--border)' }}
+      >
         <input
           type="checkbox"
           checked={hasSelection && selectedEmails.size === emails.length}

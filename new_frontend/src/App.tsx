@@ -720,7 +720,7 @@ function App() {
       />
 
       {/* Tab Navigation */}
-      <div className="transition-colors" style={{ borderBottom: '1px solid var(--border)', backgroundColor: '#0f172a' }}>
+      <div className="transition-colors bg-white dark:bg-[#0f172a]" style={{ borderBottom: '1px solid var(--border)' }}>
         <div className="flex items-center justify-between px-6">
           <div className="flex gap-6">
           <button
