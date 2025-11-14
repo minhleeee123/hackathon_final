@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Email, EmailFolder, GmailLabel, Task, TaskStatus, PaymentItem } from './types';
+import { Email, EmailFolder, GmailLabel, Task, TaskStatus, PaymentItem, AccountMode } from './types';
 import { mockEmails, mockGmailLabels } from './mockData';
+import { mockBusinessEmails, mockBusinessLabels } from './mockDataBusiness';
 import Sidebar from './components/Sidebar';
 import EmailList from './components/EmailList';
 import EmailDetail from './components/EmailDetail';
@@ -46,6 +47,7 @@ function App() {
   const [selectedEmails, setSelectedEmails] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
   const [useRealData, setUseRealData] = useState(false);
+  const [accountMode, setAccountMode] = useState<AccountMode>('personal');
   const [isClassifying, setIsClassifying] = useState(false);
   const [classificationProgress, setClassificationProgress] = useState({ current: 0, total: 0 });
   const [aiLabelsInitialized, setAiLabelsInitialized] = useState(false);
@@ -100,6 +102,27 @@ function App() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleToggleAccountMode = () => {
+    const newMode: AccountMode = accountMode === 'personal' ? 'business' : 'personal';
+    setAccountMode(newMode);
+    
+    // Switch to appropriate mock data
+    if (!useRealData) {
+      if (newMode === 'business') {
+        setEmails(mockBusinessEmails);
+        setGmailLabels(mockBusinessLabels);
+      } else {
+        setEmails(mockEmails);
+        setGmailLabels(mockGmailLabels);
+      }
+      // Reset UI state
+      setSelectedEmails(new Set());
+      setSelectedEmailId(null);
+      setMockLabelsVisible(false);
+    }
+    // For real data, labels will be managed by Gmail API
   };
 
   const selectedEmail = emails.find(e => e.id === selectedEmailId);
@@ -749,9 +772,14 @@ function App() {
             // Load real data when toggled on
             loadGmailData();
           } else {
-            // Switch back to mock data
-            setEmails(mockEmails);
-            setGmailLabels(mockGmailLabels);
+            // Switch back to mock data based on current mode
+            if (accountMode === 'business') {
+              setEmails(mockBusinessEmails);
+              setGmailLabels(mockBusinessLabels);
+            } else {
+              setEmails(mockEmails);
+              setGmailLabels(mockGmailLabels);
+            }
             setSelectedEmails(new Set());
             setSelectedEmailId(null);
             setMockLabelsVisible(false); // Reset label visibility for demo
@@ -759,6 +787,8 @@ function App() {
         }}
         onRefreshData={loadGmailData}
         isLoading={isLoading}
+        accountMode={accountMode}
+        onToggleAccountMode={handleToggleAccountMode}
       />
 
       {/* Tab Navigation */}

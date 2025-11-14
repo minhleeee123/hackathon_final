@@ -1,5 +1,26 @@
 export type EmailFolder = 'inbox' | 'starred' | 'sent' | 'drafts' | 'trash' | 'spam' | 'all';
 
+// Account Mode: Personal vs Business
+export type AccountMode = 'personal' | 'business';
+
+// Business-specific types
+export type EmailPriority = 'urgent' | 'high' | 'normal' | 'low';
+export type Department = 'sales' | 'hr' | 'tech' | 'finance' | 'marketing' | 'support' | 'general';
+
+export interface BusinessMetadata {
+  priority: EmailPriority;
+  department?: Department;
+  projectId?: string;
+  projectName?: string;
+  clientId?: string;
+  clientName?: string;
+  ticketId?: string;
+  isInternal?: boolean; // Email nội bộ công ty
+  requiresApproval?: boolean;
+  approvedBy?: string[];
+  confidentiality?: 'public' | 'internal' | 'confidential' | 'top-secret';
+}
+
 // Gmail Label from API (can be system or user labels)
 export interface GmailLabel {
   id: string;
@@ -34,6 +55,8 @@ export interface Email {
   attachments?: Attachment[];
   folder: EmailFolder;
   isDraft?: boolean;
+  // Business-specific fields
+  businessMetadata?: BusinessMetadata;
 }
 
 export interface Attachment {

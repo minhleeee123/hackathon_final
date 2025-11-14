@@ -1,5 +1,6 @@
-import { Search, Menu, Settings, RefreshCw, Moon, Sun } from 'lucide-react';
+import { Search, Menu, Settings, RefreshCw, Moon, Sun, User, Building2 } from 'lucide-react';
 import { useTheme } from './ThemeProvider';
+import { AccountMode } from '../types';
 
 interface HeaderProps {
   searchQuery: string;
@@ -9,6 +10,8 @@ interface HeaderProps {
   onToggleDataSource?: () => void;
   onRefreshData?: () => void;
   isLoading?: boolean;
+  accountMode?: AccountMode;
+  onToggleAccountMode?: () => void;
 }
 
 export default function Header({ 
@@ -18,7 +21,9 @@ export default function Header({
   useRealData = false,
   onToggleDataSource,
   onRefreshData,
-  isLoading = false
+  isLoading = false,
+  accountMode = 'personal',
+  onToggleAccountMode
 }: HeaderProps) {
   const { theme, toggleTheme } = useTheme();
   
@@ -84,6 +89,29 @@ export default function Header({
       </div>
 
       <div className="flex items-center gap-2">
+        {onToggleAccountMode && (
+          <button
+            onClick={onToggleAccountMode}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-all ${
+              accountMode === 'business'
+                ? 'bg-blue-600 text-white hover:bg-blue-700'
+                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+            }`}
+            title={accountMode === 'personal' ? 'Switch to Business Mode' : 'Switch to Personal Mode'}
+          >
+            {accountMode === 'business' ? (
+              <>
+                <Building2 className="w-4 h-4" />
+                <span className="text-sm font-medium">Business</span>
+              </>
+            ) : (
+              <>
+                <User className="w-4 h-4" />
+                <span className="text-sm font-medium">Personal</span>
+              </>
+            )}
+          </button>
+        )}
         <button 
           onClick={toggleTheme}
           className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
