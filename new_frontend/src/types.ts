@@ -116,3 +116,44 @@ export interface PaymentItem {
   paidAt?: string; // Thời điểm thanh toán
   createdAt: string;
 }
+
+// Contract Analyzer Types
+export type ContractType = 'msa' | 'license' | 'nda' | 'sla' | 'employment' | 'other';
+export type ContractStatus = 'pending_review' | 'under_negotiation' | 'approved' | 'signed' | 'rejected' | 'expired';
+export type RiskLevel = 'high' | 'medium' | 'low';
+
+export interface CriticalRisk {
+  title: string;
+  description: string;
+  recommendation: string;
+  priority: number; // 1 = highest priority
+}
+
+export interface RiskAnalysis {
+  overallScore: number; // 0-10 scale
+  riskLevel: RiskLevel;
+  criticalRisks: CriticalRisk[];
+  moderateRisks: string[];
+  favorableTerms: string[];
+}
+
+export interface ContractDetails {
+  title: string;
+  client: string;
+  value: number;
+  currency: string;
+  type: ContractType;
+  status: ContractStatus;
+  deadline?: string;
+  receivedDate: string;
+  duration?: string;
+  keyTerms?: string[];
+}
+
+export interface Contract {
+  id: string;
+  emailId: string; // Link to email containing contract
+  contractDetails: ContractDetails;
+  riskAnalysis: RiskAnalysis;
+  attachments: Attachment[];
+}

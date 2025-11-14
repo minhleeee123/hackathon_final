@@ -1,5 +1,5 @@
-import { Email, GmailLabel } from '../types';
-import { Star, Archive, Trash2, MoreVertical, RefreshCw, Sparkles, ListTodo, DollarSign, Paperclip } from 'lucide-react';
+import { Email, GmailLabel, AccountMode } from '../types';
+import { Star, Archive, Trash2, MoreVertical, RefreshCw, Sparkles, ListTodo, DollarSign, Paperclip, FileText } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { useTheme } from './ThemeProvider';
@@ -19,6 +19,8 @@ interface EmailListProps {
   onBulkExtractTasks?: () => void;
   onBulkExtractPayments?: () => void;
   onMoveSpamToTrash?: () => void;
+  onOpenContractAnalyzer?: () => void;
+  accountMode?: AccountMode;
   isClassifying?: boolean;
   isExtractingTasks?: boolean;
   isExtractingPayments?: boolean;
@@ -42,6 +44,8 @@ export default function EmailList({
   onBulkExtractTasks,
   onBulkExtractPayments,
   onMoveSpamToTrash,
+  onOpenContractAnalyzer,
+  accountMode = 'personal',
   isClassifying = false,
   isExtractingTasks = false,
   isExtractingPayments = false,
@@ -238,6 +242,16 @@ export default function EmailList({
                   </div>
                 )}
               </>
+            )}
+            {accountMode === 'business' && onOpenContractAnalyzer && (
+              <button
+                onClick={onOpenContractAnalyzer}
+                className="px-3 py-1.5 rounded transition-colors flex items-center gap-1.5 text-sm font-medium bg-purple-600 text-white hover:bg-purple-700"
+                title="Phân tích hợp đồng bằng AI"
+              >
+                <FileText className="w-4 h-4" />
+                Contract Analyzer
+              </button>
             )}
             {onMoveSpamToTrash && (
               <button

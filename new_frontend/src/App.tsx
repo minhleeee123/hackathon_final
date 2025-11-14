@@ -10,6 +10,7 @@ import LabelManager from './components/LabelManager';
 import Header from './components/Header';
 import TaskManagementPage from './components/TaskManagementPage';
 import FinanceManagementPage from './components/FinanceManagementPage';
+import ContractAnalyzer from './components/ContractAnalyzer';
 import { useTheme } from './components/ThemeProvider';
 import { 
   fetchGmailEmails, 
@@ -54,7 +55,7 @@ function App() {
   const [mockLabelsVisible, setMockLabelsVisible] = useState(false); // Track if mock labels should be shown
   
   // Task Management state
-  const [currentTab, setCurrentTab] = useState<'emails' | 'tasks' | 'finance'>('emails');
+  const [currentTab, setCurrentTab] = useState<'emails' | 'tasks' | 'finance' | 'contracts'>('emails');
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isExtractingTasks, setIsExtractingTasks] = useState(false);
   const [taskExtractionProgress, setTaskExtractionProgress] = useState({ current: 0, total: 0 });
@@ -104,6 +105,10 @@ function App() {
     }
   };
 
+  const handleOpenContractAnalyzer = () => {
+    setCurrentTab('contracts');
+  };
+  
   const handleToggleAccountMode = () => {
     const newMode: AccountMode = accountMode === 'personal' ? 'business' : 'personal';
     setAccountMode(newMode);
@@ -879,6 +884,8 @@ function App() {
               onBulkExtractTasks={handleBulkExtractTasks}
               onBulkExtractPayments={handleBulkExtractPayments}
               onMoveSpamToTrash={handleMoveSpamToTrash}
+              onOpenContractAnalyzer={handleOpenContractAnalyzer}
+              accountMode={accountMode}
               isClassifying={isClassifying}
               isExtractingTasks={isExtractingTasks}
               isExtractingPayments={isExtractingPayments}
@@ -910,6 +917,8 @@ function App() {
             onDeleteTask={handleDeleteTask}
             onCreateTask={handleCreateTask}
           />
+        ) : currentTab === 'contracts' ? (
+          <ContractAnalyzer />
         ) : (
           <FinanceManagementPage
             payments={payments}
