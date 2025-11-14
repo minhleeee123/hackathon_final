@@ -1,0 +1,43 @@
+/.idea
+__pycache__
+.vscode
+chat_logs/*
+
+react_logs/*
+
+alembic.ini
+spoon_ai_sdk.egg-info/*
+
+.tox
+
+uv.lock
+.idea/
+
+history.txt
+
+.venv/
+.DS_Store
+CLAUDE.md
+
+# Virtual environment
+spoon-env/
+
+# Test installation file (not needed in repo)
+test_installation.py
+
+# Environment variables (keep .env in gitignore for security)
+.env
+
+# Python cache
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+.Python
+*.egg
+*.egg-info
+.eggs/
+.pytest_cache/
+.mypy_cache/
+
+# Keep test_spoon/ - this is our learning tests!
