@@ -127,9 +127,9 @@ export default function EmailList({
   };
 
   return (
-    <div className="flex-1 flex flex-col bg-white overflow-hidden">
+    <div className="flex-1 flex flex-col overflow-hidden transition-colors" style={{ backgroundColor: 'var(--background)' }}>
       {/* Toolbar */}
-      <div className="h-12 border-b border-gray-200 flex items-center px-4 gap-2 flex-shrink-0">
+      <div className="h-12 flex items-center px-4 gap-2 flex-shrink-0 transition-colors" style={{ borderBottom: '1px solid var(--border)', backgroundColor: '#0f172a' }}>
         <input
           type="checkbox"
           checked={hasSelection && selectedEmails.size === emails.length}
@@ -232,46 +232,46 @@ export default function EmailList({
                 )}
               </>
             )}
-            <div className="w-px h-6 bg-gray-300 mx-1" />
+            <div className="w-px h-6 bg-gray-300 dark:bg-emerald-500 mx-1" />
             <button
               onClick={() => onBulkMarkAsRead(true)}
-              className="p-2 hover:bg-gray-100 rounded-full"
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
               title="Mark as read"
             >
-              <Archive className="w-5 h-5 text-gray-600" />
+              <Archive className="w-5 h-5 text-gray-600 dark:text-gray-400" />
             </button>
             <button
               onClick={onBulkDelete}
-              className="p-2 hover:bg-gray-100 rounded-full"
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
               title="Delete"
             >
-              <Trash2 className="w-5 h-5 text-gray-600" />
+              <Trash2 className="w-5 h-5 text-gray-600 dark:text-gray-400" />
             </button>
             <button
               onClick={() => onBulkMarkAsRead(false)}
-              className="p-2 hover:bg-gray-100 rounded-full"
+              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
               title="Mark as unread"
             >
-              <MoreVertical className="w-5 h-5 text-gray-600" />
+              <MoreVertical className="w-5 h-5 text-gray-600 dark:text-gray-400" />
             </button>
-            <span className="text-sm text-gray-600 ml-2">
+            <span className="text-sm text-gray-600 dark:text-gray-400 ml-2">
               {selectedEmails.size} selected
             </span>
           </>
         ) : (
           <>
-            <button className="p-2 hover:bg-gray-100 rounded-full" title="Refresh">
-              <RefreshCw className="w-5 h-5 text-gray-600" />
+            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors" title="Refresh">
+              <RefreshCw className="w-5 h-5 text-gray-600 dark:text-gray-400" />
             </button>
-            <button className="p-2 hover:bg-gray-100 rounded-full" title="More">
-              <MoreVertical className="w-5 h-5 text-gray-600" />
+            <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors" title="More">
+              <MoreVertical className="w-5 h-5 text-gray-600 dark:text-gray-400" />
             </button>
           </>
         )}
 
         <div className="flex-1" />
 
-        <span className="text-sm text-gray-600">
+        <span className="text-sm text-gray-600 dark:text-gray-400">
           {emails.length} {emails.length === 1 ? 'email' : 'emails'}
         </span>
       </div>
@@ -279,7 +279,7 @@ export default function EmailList({
       {/* Email list */}
       <div className="flex-1 overflow-y-auto">
         {emails.length === 0 ? (
-          <div className="flex items-center justify-center h-full text-gray-400">
+          <div className="flex items-center justify-center h-full text-gray-400 dark:text-gray-500">
             <div className="text-center">
               <div className="text-6xl mb-4">📭</div>
               <div className="text-lg">No emails found</div>
@@ -290,8 +290,8 @@ export default function EmailList({
             <div
               key={email.id}
               className={`
-                email-item flex items-center gap-3 px-4 py-3 border-b border-gray-100 cursor-pointer transition-all
-                ${selectedEmailId === email.id ? 'bg-blue-50' : ''}
+                email-item flex items-center gap-3 px-4 py-3 border-b border-gray-100 dark:border-emerald-500/30 cursor-pointer transition-all
+                ${selectedEmailId === email.id ? 'bg-blue-50 dark:bg-blue-900/20' : ''}
                 ${selectedEmails.has(email.id) ? 'selected' : ''}
                 ${!email.isRead ? 'unread' : ''}
               `}
@@ -325,16 +325,16 @@ export default function EmailList({
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-baseline gap-2">
-                  <span className={`text-sm ${!email.isRead ? 'font-bold' : ''}`}>
+                  <span className={`text-sm dark:text-gray-200 ${!email.isRead ? 'font-bold' : ''}`}>
                     {email.from.name}
                   </span>
-                  <span className="text-xs text-gray-500 flex-shrink-0">
+                  <span className="text-xs text-gray-500 dark:text-gray-400 flex-shrink-0">
                     {formatDistanceToNow(email.date, { addSuffix: true, locale: vi })}
                   </span>
                 </div>
 
                 <div className="flex items-center gap-2 mt-1">
-                  <span className={`text-sm ${!email.isRead ? 'font-semibold' : 'text-gray-700'}`}>
+                  <span className={`text-sm ${!email.isRead ? 'font-semibold dark:text-gray-100' : 'text-gray-700 dark:text-gray-300'}`}>
                     {email.subject || '(No subject)'}
                   </span>
                   {email.hasAttachments && (
@@ -342,7 +342,7 @@ export default function EmailList({
                   )}
                 </div>
 
-                <div className="text-sm text-gray-600 truncate mt-1">
+                <div className="text-sm text-gray-600 dark:text-gray-400 truncate mt-1">
                   {email.snippet}
                 </div>
 

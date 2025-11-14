@@ -22,7 +22,7 @@ import {
   deleteLabel as gmailDeleteLabel,
   initializeAILabels
 } from './services/gmailService';
-import { BulkClassificationResult, ClassificationResult, TASK_LABEL, CATEGORY_LABELS, classifyEmailsBulk } from './services/aiService';
+import { BulkClassificationResult, TASK_LABEL, classifyEmailsBulk } from './services/aiService';
 import { extractTasksBulk, TaskExtractionResult } from './services/taskExtractorService';
 
 function App() {
@@ -326,72 +326,14 @@ function App() {
         .map(id => emails.find(e => e.id === id)!)
         .filter(Boolean);
 
-      // Mock mode: Apply predefined labels without API call
-      if (!useRealData) {
-        // Simulate processing delay for demo realism
-        const results: BulkClassificationResult[] = [];
-        
-        for (let i = 0; i < emailsToClassify.length; i++) {
-          const email = emailsToClassify[i];
-          setClassificationProgress({ current: i + 1, total: emailsToClassify.length });
-          
-          // Predefined mock label assignments based on email content
-          let category: ClassificationResult['category'] = 'Work';
-          let hasTask = false;
-          
-          // Determine category and task status by email subject/content
-          if (email.subject.includes('Họp') || email.subject.includes('Meeting') || email.subject.includes('Dự án')) {
-            category = 'Work';
-            hasTask = true; // Meetings/projects usually have tasks
-          } else if (email.subject.includes('Mua rau') || email.subject.includes('nhà') || email.subject.includes('Sinh nhật')) {
-            category = 'Family';
-            hasTask = email.subject.includes('Mua rau'); // Shopping list = task
-          } else if (email.subject.includes('Tiệc') || email.subject.includes('Cà phê')) {
-            category = 'Friends';
-            hasTask = false;
-          } else if (email.subject.includes('Vietcombank') || email.subject.includes('Điện lực') || email.subject.includes('hóa đơn') || email.subject.includes('thanh toán')) {
-            category = 'Finance';
-            hasTask = false;
-          } else if (email.subject.includes('Khuyến mãi') || email.subject.includes('Giảm giá') || email.subject.includes('Sale')) {
-            category = 'Promotion';
-            hasTask = false;
-          } else if (email.from.email.includes('noreply') || email.subject.includes('Congratulations')) {
-            category = 'Spam';
-            hasTask = false;
-          }
-          
-          const gmailLabel = CATEGORY_LABELS[category];
-          const isSpam = category === 'Spam' || category === 'Promotion';
-          
-          results.push({
-            emailId: email.id,
-            classification: {
-              category,
-              hasTask,
-              reasoning: `Mock classification for demo: ${category}${hasTask ? ' with task' : ''}`,
-              gmailLabel,
-              needsTaskLabel: hasTask,
-              isSpam
-            },
-            success: true
-          });
-          
-          // Simulate processing delay
-          await new Promise(resolve => setTimeout(resolve, 300));
+      const results = await classifyEmailsBulk(
+        emailsToClassify,
+        (current, total) => {
+          setClassificationProgress({ current, total });
         }
-        
-        await handleClassificationComplete(results);
-      } else {
-        // Real mode: Call Gemini API
-        const results = await classifyEmailsBulk(
-          emailsToClassify,
-          (current, total) => {
-            setClassificationProgress({ current, total });
-          }
-        );
+      );
 
-        await handleClassificationComplete(results);
-      }
+      await handleClassificationComplete(results);
     } catch (error) {
       console.error('Classification failed:', error);
     } finally {
@@ -628,18 +570,8 @@ function App() {
           console.log(`  -> Total labels to apply:`, labelIds);
           
           // Apply labels
-          if (labelIds.length > 0) {
-            if (useRealData) {
-              await handleAddLabel(result.emailId, labelIds);
-            } else {
-              // Mock mode: Update labels locally without API call
-              setEmails(prev => prev.map(email => {
-                if (email.id === result.emailId) {
-                  return { ...email, labels: labelIds };
-                }
-                return email;
-              }));
-            }
+          if (labelIds.length > 0 && useRealData) {
+            await handleAddLabel(result.emailId, labelIds);
           } else if (labelIds.length === 0) {
             console.warn(`No labels found for email ${result.emailId}`);
           }
@@ -763,7 +695,7 @@ function App() {
   const unreadCount = emails.filter(e => e.folder === 'inbox' && !e.isRead).length;
 
   return (
-    <div className="h-screen flex flex-col bg-white">
+    <div className="h-screen flex flex-col" style={{ backgroundColor: 'var(--background)', color: 'var(--foreground)' }}>
       <Header 
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
@@ -788,15 +720,15 @@ function App() {
       />
 
       {/* Tab Navigation */}
-      <div className="border-b border-gray-200 bg-white">
+      <div className="transition-colors" style={{ borderBottom: '1px solid var(--border)', backgroundColor: '#0f172a' }}>
         <div className="flex items-center justify-between px-6">
           <div className="flex gap-6">
           <button
             onClick={() => setCurrentTab('emails')}
             className={`py-3 px-4 font-medium transition-colors border-b-2 ${
               currentTab === 'emails'
-                ? 'text-blue-600 border-blue-600'
-                : 'text-gray-600 border-transparent hover:text-gray-900'
+                ? 'text-blue-600 dark:text-emerald-400 border-blue-600 dark:border-emerald-500'
+                : 'text-gray-600 dark:text-gray-400 border-transparent hover:text-gray-900 dark:hover:text-gray-100'
             }`}
           >
             📧 Emails
@@ -805,8 +737,8 @@ function App() {
             onClick={() => setCurrentTab('tasks')}
             className={`py-3 px-4 font-medium transition-colors border-b-2 flex items-center gap-2 ${
               currentTab === 'tasks'
-                ? 'text-blue-600 border-blue-600'
-                : 'text-gray-600 border-transparent hover:text-gray-900'
+                ? 'text-blue-600 dark:text-emerald-400 border-blue-600 dark:border-emerald-500'
+                : 'text-gray-600 dark:text-gray-400 border-transparent hover:text-gray-900 dark:hover:text-gray-100'
             }`}
           >
             ✅ Tasks
@@ -820,8 +752,8 @@ function App() {
             onClick={() => setCurrentTab('finance')}
             className={`py-3 px-4 font-medium transition-colors border-b-2 flex items-center gap-2 ${
               currentTab === 'finance'
-                ? 'text-blue-600 border-blue-600'
-                : 'text-gray-600 border-transparent hover:text-gray-900'
+                ? 'text-blue-600 dark:text-emerald-400 border-blue-600 dark:border-emerald-500'
+                : 'text-gray-600 dark:text-gray-400 border-transparent hover:text-gray-900 dark:hover:text-gray-100'
             }`}
           >
             💰 Finance

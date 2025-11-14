@@ -1,5 +1,5 @@
 // AI Service - Agent 1 Email Classifier
-import { Email, PaymentItem } from '../types';
+import { Email } from '../types';
 
 const GEMINI_API_KEY = 'AIzaSyAl9P_ydHYwRyNVHaiB1_LLIEhAL5su70Y';
 const GEMINI_MODEL = 'gemini-2.0-flash'; // Stable model, 2.5-flash is getting 503 errors

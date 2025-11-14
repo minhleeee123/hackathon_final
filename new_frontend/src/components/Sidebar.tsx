@@ -13,6 +13,8 @@ import {
 import { EmailFolder, GmailLabel } from '../types';
 import { folders } from '../mockData';
 
+import { useTheme } from './ThemeProvider';
+
 interface SidebarProps {
   selectedFolder: EmailFolder;
   selectedLabel: string | null;
@@ -25,6 +27,8 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ selectedFolder, selectedLabel, gmailLabels, onSelectFolder, onSelectLabel, onManageLabels, onCompose, unreadCount }: SidebarProps) {
+  const { theme } = useTheme();
+  
   const getIconComponent = (iconName: string) => {
     const iconMap: { [key: string]: any } = {
       Inbox,
@@ -118,11 +122,18 @@ export default function Sidebar({ selectedFolder, selectedLabel, gmailLabels, on
   };
 
   return (
-    <div className="w-64 border-r border-gray-200 flex flex-col bg-white flex-shrink-0">
+    <div 
+      className="w-64 flex flex-col flex-shrink-0 transition-colors border-r" 
+      style={{ 
+        borderColor: 'var(--border)', 
+        backgroundColor: theme === 'dark' ? '#0f172a' : '#ffffff'
+      }}
+    >
       <div className="p-4">
         <button 
           onClick={onCompose}
-          className="w-full flex items-center gap-3 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-md transition-all"
+          className="w-full flex items-center gap-3 px-6 py-3 text-white rounded-full shadow-md transition-all hover:opacity-90"
+          style={{ backgroundColor: 'var(--primary)' }}
         >
           <Edit className="w-5 h-5" />
           <span className="font-medium">Compose</span>
@@ -142,10 +153,21 @@ export default function Sidebar({ selectedFolder, selectedLabel, gmailLabels, on
               className={`
                 w-full flex items-center gap-3 px-4 py-2 rounded-r-full transition-all
                 ${isSelected 
-                  ? 'bg-red-100 text-gray-900 font-medium' 
-                  : 'text-gray-700 hover:bg-gray-100'
+                  ? 'text-white font-medium' 
+                  : theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
                 }
               `}
+              style={isSelected ? { backgroundColor: theme === 'dark' ? '#8b5cf6' : '#fecaca' } : {}}
+              onMouseEnter={(e) => {
+                if (!isSelected) {
+                  e.currentTarget.style.backgroundColor = theme === 'dark' ? '#4435e3' : '#f3f4f6';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isSelected) {
+                  e.currentTarget.style.backgroundColor = '';
+                }
+              }}
             >
               <IconComponent className="w-5 h-5" />
               <span className="flex-1 text-left text-sm">{folder.name}</span>
@@ -156,24 +178,24 @@ export default function Sidebar({ selectedFolder, selectedLabel, gmailLabels, on
           );
         })}
 
-        <div className="my-2 border-t border-gray-200" />
+        <div className="my-2 border-t border-gray-200 dark:border-emerald-500" />
 
         <div className="px-4 py-2 flex items-center justify-between">
-          <div className="text-xs font-medium text-gray-500 flex items-center gap-2">
+          <div className="text-xs font-medium text-gray-500 dark:text-gray-400 flex items-center gap-2">
             <Tag className="w-3 h-3" />
             Labels
           </div>
           <button
             onClick={onManageLabels}
-            className="p-1 hover:bg-gray-100 rounded transition-colors"
+            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded transition-colors"
             title="Quản lý labels"
           >
-            <Settings className="w-3.5 h-3.5 text-gray-600" />
+            <Settings className="w-3.5 h-3.5 text-gray-600 dark:text-gray-400" />
           </button>
         </div>
 
         {userLabels.length === 0 ? (
-          <div className="px-4 py-2 text-xs text-gray-400 italic">
+          <div className="px-4 py-2 text-xs text-gray-400 dark:text-gray-500 italic">
             Chưa có label tự tạo
           </div>
         ) : (
@@ -184,10 +206,21 @@ export default function Sidebar({ selectedFolder, selectedLabel, gmailLabels, on
               className={`
                 w-full flex items-center gap-3 px-4 py-2 rounded-r-full transition-all
                 ${selectedLabel === label.id
-                  ? 'bg-red-100 text-gray-900 font-medium'
-                  : 'text-gray-700 hover:bg-gray-100'
+                  ? 'text-white font-medium'
+                  : theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
                 }
               `}
+              style={selectedLabel === label.id ? { backgroundColor: theme === 'dark' ? '#8b5cf6' : '#fecaca' } : {}}
+              onMouseEnter={(e) => {
+                if (selectedLabel !== label.id) {
+                  e.currentTarget.style.backgroundColor = theme === 'dark' ? '#4435e3' : '#f3f4f6';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (selectedLabel !== label.id) {
+                  e.currentTarget.style.backgroundColor = '';
+                }
+              }}
             >
               <div className={`w-3 h-3 rounded-full ${getColorClass(label)}`} />
               <span className="flex-1 text-left text-sm">{label.name}</span>

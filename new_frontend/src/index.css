@@ -2,6 +2,52 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :root {
+    --background: oklch(1.0000 0 0);
+    --foreground: oklch(0.3588 0.1354 278.6973);
+    --card: oklch(1.0000 0 0);
+    --card-foreground: oklch(0.3588 0.1354 278.6973);
+    --popover: oklch(1.0000 0 0);
+    --popover-foreground: oklch(0.3588 0.1354 278.6973);
+    --primary: oklch(0.6056 0.2189 292.7172);
+    --primary-foreground: oklch(1.0000 0 0);
+    --secondary: oklch(0.9618 0.0202 295.1913);
+    --secondary-foreground: oklch(0.4568 0.2146 277.0229);
+    --muted: oklch(0.9691 0.0161 293.7558);
+    --muted-foreground: oklch(0.5413 0.2466 293.0090);
+    --accent: oklch(0.9319 0.0316 255.5855);
+    --accent-foreground: oklch(0.4244 0.1809 265.6377);
+    --destructive: oklch(0.6368 0.2078 25.3313);
+    --destructive-foreground: oklch(1.0000 0 0);
+    --border: oklch(0.9299 0.0334 272.7879);
+    --input: oklch(0.9299 0.0334 272.7879);
+    --ring: oklch(0.6056 0.2189 292.7172);
+  }
+
+  .dark {
+    --background: oklch(0.2077 0.0398 265.7549);
+    --foreground: oklch(0.9299 0.0334 272.7879);
+    --card: oklch(0.2573 0.0861 281.2883);
+    --card-foreground: oklch(0.9299 0.0334 272.7879);
+    --popover: oklch(0.2573 0.0861 281.2883);
+    --popover-foreground: oklch(0.9299 0.0334 272.7879);
+    --primary: oklch(0.6056 0.2189 292.7172);
+    --primary-foreground: oklch(1.0000 0 0);
+    --secondary: oklch(0.2573 0.0861 281.2883);
+    --secondary-foreground: oklch(0.9299 0.0334 272.7879);
+    --muted: oklch(0.2329 0.0919 279.1398);
+    --muted-foreground: oklch(0.8112 0.1013 293.5712);
+    --accent: oklch(0.4568 0.2146 277.0229);
+    --accent-foreground: oklch(0.9299 0.0334 272.7879);
+    --destructive: oklch(0.6368 0.2078 25.3313);
+    --destructive-foreground: oklch(1.0000 0 0);
+    --border: oklch(0.2827 0.1351 291.0894);
+    --input: oklch(0.2827 0.1351 291.0894);
+    --ring: oklch(0.6056 0.2189 292.7172);
+  }
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -9,10 +55,12 @@
 }
 
 body {
-  font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow: hidden;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
 }
 
 /* Scrollbar styling */
@@ -26,22 +74,31 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #dadce0;
+  @apply bg-gray-300 dark:bg-gray-700;
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #bdc1c6;
+  @apply bg-gray-400 dark:bg-gray-600;
 }
 
 /* Gmail-like hover effects */
 .email-item:hover {
+  @apply shadow-md dark:shadow-emerald-500/20;
   box-shadow: inset 1px 0 0 #dadce0, inset -1px 0 0 #dadce0, 0 1px 2px 0 rgba(60,64,67,.3), 0 1px 3px 1px rgba(60,64,67,.15);
   z-index: 1;
 }
 
+.dark .email-item:hover {
+  box-shadow: inset 1px 0 0 #10b981, inset -1px 0 0 #10b981, 0 1px 2px 0 rgba(16,185,129,.5), 0 1px 3px 1px rgba(16,185,129,.3);
+}
+
 .email-item.selected {
-  background-color: #c2e7ff;
+  @apply bg-blue-100 dark:bg-blue-900/30;
+}
+
+.dark .email-item.selected {
+  box-shadow: 0 0 10px rgba(16,185,129,.5);
 }
 
 .email-item.unread {
@@ -50,7 +107,7 @@ body {
 
 /* Quill editor customization */
 .ql-container {
-  font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   font-size: 14px;
 }
 
@@ -63,15 +120,14 @@ body {
   appearance: none;
   width: 20px;
   height: 20px;
-  border: 2px solid #5f6368;
+  @apply border-2 border-gray-600 dark:border-gray-400;
   border-radius: 2px;
   cursor: pointer;
   position: relative;
 }
 
 .gmail-checkbox:checked {
-  background-color: #1a73e8;
-  border-color: #1a73e8;
+  @apply bg-blue-600 dark:bg-blue-500 border-blue-600 dark:border-blue-500;
 }
 
 .gmail-checkbox:checked::after {
