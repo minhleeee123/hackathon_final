@@ -65,6 +65,11 @@ function App() {
   const [isExtractingPayments, setIsExtractingPayments] = useState(false);
   const [paymentExtractionProgress, setPaymentExtractionProgress] = useState({ current: 0, total: 0 });
 
+  // Contract Analyzer state
+  const [contractsAnalyzed, setContractsAnalyzed] = useState(false);
+  const [isAnalyzingContracts, setIsAnalyzingContracts] = useState(false);
+  const [contractAnalysisProgress, setContractAnalysisProgress] = useState({ current: 0, total: 0 });
+
   // Removed auto-load effect - only load when user explicitly toggles to real data
   
   // Initialize AI classification labels
@@ -105,8 +110,30 @@ function App() {
     }
   };
 
-  const handleOpenContractAnalyzer = () => {
-    setCurrentTab('contracts');
+  const handleOpenContractAnalyzer = async () => {
+    // If already analyzed, do nothing
+    if (contractsAnalyzed) {
+      return;
+    }
+    
+    // Start analysis simulation
+    setIsAnalyzingContracts(true);
+    setContractAnalysisProgress({ current: 0, total: 6 });
+    
+    try {
+      // Simulate AI contract analysis with progress
+      for (let i = 1; i <= 6; i++) {
+        await new Promise(resolve => setTimeout(resolve, 800)); // 800ms per contract
+        setContractAnalysisProgress({ current: i, total: 6 });
+      }
+      
+      // Mark as analyzed
+      setContractsAnalyzed(true);
+    } catch (error) {
+      console.error('Contract analysis failed:', error);
+    } finally {
+      setIsAnalyzingContracts(false);
+    }
   };
   
   const handleToggleAccountMode = () => {
@@ -840,6 +867,23 @@ function App() {
               </span>
             )}
           </button>
+          {accountMode === 'business' && (
+            <button
+              onClick={() => setCurrentTab('contracts')}
+              className={`py-3 px-4 font-medium transition-colors border-b-2 flex items-center gap-2 ${
+                currentTab === 'contracts'
+                  ? 'text-blue-600 dark:text-emerald-400 border-blue-600 dark:border-emerald-500'
+                  : 'text-gray-600 dark:text-gray-400 border-transparent hover:text-gray-900 dark:hover:text-gray-100'
+              }`}
+            >
+              Contracts
+              {contractsAnalyzed && (
+                <span className="bg-purple-600 text-white px-2 py-0.5 rounded-full text-xs">
+                  6
+                </span>
+              )}
+            </button>
+          )}
           </div>
           
           <div className="text-xs text-gray-500 py-3">
@@ -889,9 +933,11 @@ function App() {
               isClassifying={isClassifying}
               isExtractingTasks={isExtractingTasks}
               isExtractingPayments={isExtractingPayments}
+              isAnalyzingContracts={isAnalyzingContracts}
               classificationProgress={classificationProgress}
               taskExtractionProgress={taskExtractionProgress}
               paymentExtractionProgress={paymentExtractionProgress}
+              contractAnalysisProgress={contractAnalysisProgress}
             />
 
             {selectedEmail && (
@@ -918,7 +964,11 @@ function App() {
             onCreateTask={handleCreateTask}
           />
         ) : currentTab === 'contracts' ? (
-          <ContractAnalyzer />
+          <ContractAnalyzer 
+            contractsAnalyzed={contractsAnalyzed}
+            isAnalyzing={isAnalyzingContracts}
+            analysisProgress={contractAnalysisProgress}
+          />
         ) : (
           <FinanceManagementPage
             payments={payments}

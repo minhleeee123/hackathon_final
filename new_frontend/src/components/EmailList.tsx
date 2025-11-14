@@ -24,9 +24,11 @@ interface EmailListProps {
   isClassifying?: boolean;
   isExtractingTasks?: boolean;
   isExtractingPayments?: boolean;
+  isAnalyzingContracts?: boolean;
   classificationProgress?: { current: number; total: number };
   taskExtractionProgress?: { current: number; total: number };
   paymentExtractionProgress?: { current: number; total: number };
+  contractAnalysisProgress?: { current: number; total: number };
 }
 
 export default function EmailList({
@@ -49,9 +51,11 @@ export default function EmailList({
   isClassifying = false,
   isExtractingTasks = false,
   isExtractingPayments = false,
+  isAnalyzingContracts = false,
   classificationProgress = { current: 0, total: 0 },
   taskExtractionProgress = { current: 0, total: 0 },
   paymentExtractionProgress = { current: 0, total: 0 },
+  contractAnalysisProgress = { current: 0, total: 0 },
 }: EmailListProps) {
   const { theme } = useTheme();
   const hasSelection = selectedEmails.size > 0;
@@ -244,14 +248,35 @@ export default function EmailList({
               </>
             )}
             {accountMode === 'business' && onOpenContractAnalyzer && (
-              <button
-                onClick={onOpenContractAnalyzer}
-                className="px-3 py-1.5 rounded transition-colors flex items-center gap-1.5 text-sm font-medium bg-purple-600 text-white hover:bg-purple-700"
-                title="Phân tích hợp đồng bằng AI"
-              >
-                <FileText className="w-4 h-4" />
-                Contract Analyzer
-              </button>
+              <>
+                <button
+                  onClick={onOpenContractAnalyzer}
+                  disabled={isAnalyzingContracts || isClassifying || isExtractingTasks || isExtractingPayments}
+                  className={`px-3 py-1.5 rounded transition-colors flex items-center gap-1.5 text-sm font-medium ${
+                    isAnalyzingContracts 
+                      ? 'bg-purple-400 text-white cursor-not-allowed' 
+                      : 'bg-purple-600 text-white hover:bg-purple-700'
+                  }`}
+                  title="Phân tích hợp đồng bằng AI"
+                >
+                  <FileText className={`w-4 h-4 ${isAnalyzingContracts ? 'animate-spin' : ''}`} />
+                  {isAnalyzingContracts ? 'Đang phân tích...' : 'Contract Analyzer'}
+                </button>
+                
+                {isAnalyzingContracts && contractAnalysisProgress.total > 0 && (
+                  <div className="flex items-center gap-2 ml-2">
+                    <div className="w-32 bg-gray-200 rounded-full h-2">
+                      <div
+                        className="bg-purple-600 h-2 rounded-full transition-all duration-300"
+                        style={{ width: `${(contractAnalysisProgress.current / contractAnalysisProgress.total) * 100}%` }}
+                      />
+                    </div>
+                    <span className="text-xs text-gray-600">
+                      {contractAnalysisProgress.current}/{contractAnalysisProgress.total}
+                    </span>
+                  </div>
+                )}
+              </>
             )}
             {onMoveSpamToTrash && (
               <button

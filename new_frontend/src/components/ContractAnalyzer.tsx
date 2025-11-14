@@ -1,23 +1,44 @@
-import { useState } from 'react';
-import { FileText, AlertTriangle, CheckCircle, TrendingUp, Search, Download, Mail, CheckSquare, XCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { FileText, AlertTriangle, CheckCircle, TrendingUp, Search, Download, Mail, CheckSquare, XCircle, Sparkles } from 'lucide-react';
 import { Contract, RiskLevel } from '../types';
 import { mockContracts } from '../mockContractData';
 import { useTheme } from './ThemeProvider';
 
-export default function ContractAnalyzer() {
+interface ContractAnalyzerProps {
+  contractsAnalyzed?: boolean;
+  isAnalyzing?: boolean;
+  analysisProgress?: { current: number; total: number };
+}
+
+export default function ContractAnalyzer({ 
+  contractsAnalyzed = false,
+  isAnalyzing = false,
+  analysisProgress = { current: 0, total: 0 }
+}: ContractAnalyzerProps) {
   const { theme } = useTheme();
-  const [selectedContract, setSelectedContract] = useState<Contract>(mockContracts[0]);
+  
+  // Only use contracts if analysis is complete
+  const contracts = contractsAnalyzed ? mockContracts : [];
+  
+  const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterRisk, setFilterRisk] = useState<RiskLevel | 'all'>('all');
 
+  // Set first contract when analysis completes
+  useEffect(() => {
+    if (contractsAnalyzed && contracts.length > 0 && !selectedContract) {
+      setSelectedContract(contracts[0]);
+    }
+  }, [contractsAnalyzed, contracts, selectedContract]);
+
   // Statistics
-  const totalContracts = mockContracts.length;
-  const highRiskCount = mockContracts.filter(c => c.riskAnalysis.riskLevel === 'high').length;
-  const mediumRiskCount = mockContracts.filter(c => c.riskAnalysis.riskLevel === 'medium').length;
-  const signedCount = mockContracts.filter(c => c.contractDetails.status === 'signed').length;
+  const totalContracts = contracts.length;
+  const highRiskCount = contracts.filter(c => c.riskAnalysis.riskLevel === 'high').length;
+  const mediumRiskCount = contracts.filter(c => c.riskAnalysis.riskLevel === 'medium').length;
+  const signedCount = contracts.filter(c => c.contractDetails.status === 'signed').length;
 
   // Filter contracts
-  const filteredContracts = mockContracts.filter(contract => {
+  const filteredContracts = contracts.filter(contract => {
     const matchesSearch = contract.contractDetails.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          contract.contractDetails.client.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesRisk = filterRisk === 'all' || contract.riskAnalysis.riskLevel === filterRisk;
@@ -56,6 +77,58 @@ export default function ContractAnalyzer() {
     if (value === 0) return '-';
     return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(value);
   };
+
+  // Empty state - show when not yet analyzed
+  if (!contractsAnalyzed && !isAnalyzing) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center h-screen" style={{ backgroundColor: theme === 'dark' ? '#1e293b' : '#f9fafb' }}>
+        <FileText className="w-24 h-24 text-gray-300 dark:text-gray-600 mb-6" />
+        <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--foreground)' }}>Contract Analyzer</h2>
+        <p className="text-gray-500 dark:text-gray-400 text-center max-w-md mb-6">
+          Chọn email chứa hợp đồng và click button "Contract Analyzer" để AI phân tích tự động
+        </p>
+        <div className="flex items-center gap-2 text-sm text-gray-400">
+          <Sparkles className="w-4 h-4" />
+          <span>AI sẽ phân tích rủi ro, điều khoản quan trọng và đưa ra khuyến nghị</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Loading state - show during analysis
+  if (isAnalyzing) {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center h-screen" style={{ backgroundColor: theme === 'dark' ? '#1e293b' : '#f9fafb' }}>
+        <div className="relative mb-8">
+          <FileText className="w-24 h-24 text-purple-400 animate-pulse" />
+          <Sparkles className="w-8 h-8 text-purple-600 absolute top-0 right-0 animate-spin" />
+        </div>
+        <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--foreground)' }}>Đang phân tích hợp đồng...</h2>
+        <p className="text-gray-500 dark:text-gray-400 mb-6">
+          AI đang trích xuất điều khoản và phân tích rủi ro
+        </p>
+        
+        {analysisProgress.total > 0 && (
+          <div className="w-96">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                Đã phân tích: {analysisProgress.current}/{analysisProgress.total} hợp đồng
+              </span>
+              <span className="text-sm font-bold text-purple-600">
+                {Math.round((analysisProgress.current / analysisProgress.total) * 100)}%
+              </span>
+            </div>
+            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3">
+              <div
+                className="bg-purple-600 h-3 rounded-full transition-all duration-500"
+                style={{ width: `${(analysisProgress.current / analysisProgress.total) * 100}%` }}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 flex flex-col h-screen overflow-hidden" style={{ backgroundColor: theme === 'dark' ? '#1e293b' : '#f9fafb' }}>
@@ -102,36 +175,36 @@ export default function ContractAnalyzer() {
 
         {/* Statistics Cards */}
         <div className="grid grid-cols-4 gap-4">
-          <div className="p-4 rounded-lg" style={{ backgroundColor: theme === 'dark' ? '#334155' : '#f0f9ff' }}>
-            <div className="flex items-center gap-2 mb-2">
+          <div className="p-2 rounded-lg" style={{ backgroundColor: theme === 'dark' ? '#334155' : '#f0f9ff' }}>
+            <div className="flex items-center gap-2 mb-1">
               <FileText className="w-4 h-4 text-blue-600" />
-              <span className="text-sm font-medium text-gray-600 dark:text-gray-300">Total Contracts</span>
+              <span className="text-xs font-medium text-gray-600 dark:text-gray-300">Total Contracts</span>
             </div>
-            <div className="text-3xl font-bold text-blue-600">{totalContracts}</div>
+            <div className="text-2xl font-bold text-blue-600">{totalContracts}</div>
           </div>
           
-          <div className="p-4 rounded-lg" style={{ backgroundColor: theme === 'dark' ? '#334155' : '#fef2f2' }}>
-            <div className="flex items-center gap-2 mb-2">
+          <div className="p-2 rounded-lg" style={{ backgroundColor: theme === 'dark' ? '#334155' : '#fef2f2' }}>
+            <div className="flex items-center gap-2 mb-1">
               <AlertTriangle className="w-4 h-4 text-red-600" />
-              <span className="text-sm font-medium text-gray-600 dark:text-gray-300">High Risk</span>
+              <span className="text-xs font-medium text-gray-600 dark:text-gray-300">High Risk</span>
             </div>
-            <div className="text-3xl font-bold text-red-600">{highRiskCount}</div>
+            <div className="text-2xl font-bold text-red-600">{highRiskCount}</div>
           </div>
 
-          <div className="p-4 rounded-lg" style={{ backgroundColor: theme === 'dark' ? '#334155' : '#fefce8' }}>
-            <div className="flex items-center gap-2 mb-2">
+          <div className="p-2 rounded-lg" style={{ backgroundColor: theme === 'dark' ? '#334155' : '#fefce8' }}>
+            <div className="flex items-center gap-2 mb-1">
               <TrendingUp className="w-4 h-4 text-yellow-600" />
-              <span className="text-sm font-medium text-gray-600 dark:text-gray-300">Medium Risk</span>
+              <span className="text-xs font-medium text-gray-600 dark:text-gray-300">Medium Risk</span>
             </div>
-            <div className="text-3xl font-bold text-yellow-600">{mediumRiskCount}</div>
+            <div className="text-2xl font-bold text-yellow-600">{mediumRiskCount}</div>
           </div>
 
-          <div className="p-4 rounded-lg" style={{ backgroundColor: theme === 'dark' ? '#334155' : '#f0fdf4' }}>
-            <div className="flex items-center gap-2 mb-2">
+          <div className="p-2 rounded-lg" style={{ backgroundColor: theme === 'dark' ? '#334155' : '#f0fdf4' }}>
+            <div className="flex items-center gap-2 mb-1">
               <CheckCircle className="w-4 h-4 text-green-600" />
-              <span className="text-sm font-medium text-gray-600 dark:text-gray-300">Signed</span>
+              <span className="text-xs font-medium text-gray-600 dark:text-gray-300">Signed</span>
             </div>
-            <div className="text-3xl font-bold text-green-600">{signedCount}</div>
+            <div className="text-2xl font-bold text-green-600">{signedCount}</div>
           </div>
         </div>
       </div>
@@ -148,13 +221,13 @@ export default function ContractAnalyzer() {
                   key={contract.id}
                   onClick={() => setSelectedContract(contract)}
                   className={`w-full p-4 rounded-lg text-left transition-all ${
-                    selectedContract.id === contract.id 
+                    selectedContract?.id === contract.id 
                       ? 'bg-purple-100 dark:bg-purple-900/30 border-2 border-purple-500' 
                       : 'border hover:border-purple-300 dark:hover:border-purple-700'
                   }`}
                   style={{ 
-                    borderColor: selectedContract.id === contract.id ? undefined : 'var(--border)',
-                    backgroundColor: selectedContract.id === contract.id ? undefined : (theme === 'dark' ? '#334155' : '#ffffff')
+                    borderColor: selectedContract?.id === contract.id ? undefined : 'var(--border)',
+                    backgroundColor: selectedContract?.id === contract.id ? undefined : (theme === 'dark' ? '#334155' : '#ffffff')
                   }}
                 >
                   <div className="flex items-start justify-between mb-2">
@@ -188,6 +261,8 @@ export default function ContractAnalyzer() {
 
         {/* Right Panel - Contract Detail */}
         <div className="flex-1 overflow-y-auto p-6">
+          {selectedContract ? (
+            <>
           {/* Overview Section */}
           <div className="mb-6 p-6 rounded-lg border" style={{ borderColor: 'var(--border)', backgroundColor: theme === 'dark' ? '#1e293b' : '#ffffff' }}>
             <div className="flex items-center gap-2 mb-4">
@@ -370,6 +445,12 @@ export default function ContractAnalyzer() {
               </button>
             </div>
           </div>
+          </>
+          ) : (
+            <div className="flex items-center justify-center h-full">
+              <p className="text-gray-500 dark:text-gray-400">Select a contract to view details</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
