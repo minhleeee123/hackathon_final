@@ -6,8 +6,8 @@ import { Textarea } from './ui/textarea';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { PaymentItem, PaymentStatus, WalletState } from '../types';
-import { Wallet, Copy, ExternalLink, Check } from 'lucide-react';
-import { convertUsdToGas, copyToClipboard, getExplorerUrl } from '../services/walletService';
+import { Wallet, Copy, ExternalLink, Check, Zap, Loader2 } from 'lucide-react';
+import { convertUsdToGas, copyToClipboard, getExplorerUrl, sendGasPayment, sendNeoPayment } from '../services/walletService';
 
 interface PaymentDialogProps {
   payment?: PaymentItem;
@@ -45,6 +45,8 @@ export default function PaymentDialog({
 
   const [showCryptoPayment, setShowCryptoPayment] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
 
   useEffect(() => {
     if (payment) {
@@ -123,8 +125,81 @@ export default function PaymentDialog({
     setFormData({ ...formData, status: 'paid' });
   };
 
-  // Calculate GAS amount if USD
-  const gasAmount = formData.currency === 'USD' ? convertUsdToGas(parseFloat(formData.amount) || 0) : null;
+  // Handle automatic payment via NeoLine
+  const handlePayNow = async () => {
+    if (!walletState?.isConnected || !walletState.address) {
+      alert('Vui lòng kết nối ví NEO trước');
+      return;
+    }
+
+    if (!formData.recipientAddress) {
+      alert('Vui lòng nhập địa chỉ ví người nhận');
+      return;
+    }
+
+    if (!gasAmount || gasAmount <= 0) {
+      alert('Số tiền thanh toán không hợp lệ');
+      return;
+    }
+
+    setIsProcessingPayment(true);
+    setPaymentError(null);
+
+    try {
+      // Send GAS payment via NeoLine
+      const txHash = await sendGasPayment(
+        walletState.address,
+        formData.recipientAddress,
+        gasAmount,
+        `Payment: ${formData.title}` // Memo
+      );
+
+      // Auto-fill transaction hash and mark as paid
+      setFormData({
+        ...formData,
+        transactionHash: txHash,
+        status: 'paid'
+      });
+
+      alert(`✓ Thanh toán thành công!\n\nTransaction Hash:\n${txHash}\n\nVui lòng lưu lại thông tin này.`);
+    } catch (error: any) {
+      console.error('Payment error:', error);
+      setPaymentError(error.message);
+      alert(`Lỗi thanh toán: ${error.message}`);
+    } finally {
+      setIsProcessingPayment(false);
+    }
+  };
+
+  // Calculate GAS amount based on currency
+  const gasAmount = (() => {
+    const amount = parseFloat(formData.amount) || 0;
+    if (amount <= 0) return null;
+    
+    switch (formData.currency) {
+      case 'USD':
+        return convertUsdToGas(amount);
+      case 'VND':
+        return convertUsdToGas(amount / 24000); // VND to USD conversion
+      case 'EUR':
+        return convertUsdToGas(amount * 1.1); // EUR to USD
+      case 'JPY':
+        return convertUsdToGas(amount / 150); // JPY to USD
+      default:
+        // Assume USD for unknown currencies
+        return convertUsdToGas(amount);
+    }
+  })();
+
+  // Debug log
+  console.log('PaymentDialog Debug:', {
+    amount: formData.amount,
+    currency: formData.currency,
+    gasAmount,
+    recipientAddress: formData.recipientAddress,
+    transactionHash: formData.transactionHash,
+    walletConnected: walletState?.isConnected
+  });
 
   const handleDelete = () => {
     if (payment && onDelete) {
@@ -297,10 +372,68 @@ export default function PaymentDialog({
                     </div>
                   )}
 
+                  {/* Auto Payment Button - FEATURED - Show ALWAYS when has gasAmount */}
+                  {gasAmount && !formData.transactionHash && (
+                    <div className="space-y-2">
+                      <Button
+                        type="button"
+                        onClick={handlePayNow}
+                        disabled={isProcessingPayment || !formData.recipientAddress}
+                        className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-semibold py-6 text-base shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isProcessingPayment ? (
+                          <>
+                            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                            Đang xử lý thanh toán...
+                          </>
+                        ) : (
+                          <>
+                            <Zap className="w-5 h-5 mr-2" />
+                            Thanh toán ngay {gasAmount} GAS
+                          </>
+                        )}
+                      </Button>
+                      
+                      {!formData.recipientAddress && (
+                        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded p-2">
+                          <p className="text-xs text-yellow-700 dark:text-yellow-400">
+                            ⚠️ Vui lòng nhập địa chỉ ví người nhận ở trên để thanh toán
+                          </p>
+                        </div>
+                      )}
+                      
+                      {paymentError && (
+                        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded p-2">
+                          <p className="text-xs text-red-700 dark:text-red-400">{paymentError}</p>
+                        </div>
+                      )}
+                      
+                      {formData.recipientAddress && (
+                        <p className="text-xs text-center text-gray-500 dark:text-gray-400">
+                          NeoLine wallet sẽ mở để xác nhận giao dịch
+                        </p>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Divider */}
+                  {gasAmount && !formData.transactionHash && (
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center">
+                        <div className="w-full border-t border-gray-300 dark:border-gray-700"></div>
+                      </div>
+                      <div className="relative flex justify-center text-xs">
+                        <span className="bg-gradient-to-br from-green-50 to-blue-50 dark:from-gray-800 dark:to-gray-900 px-2 text-gray-500 dark:text-gray-400">
+                          hoặc thanh toán thủ công
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Instructions */}
                   <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded p-3">
                     <p className="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2">
-                      Hướng dẫn thanh toán:
+                      {formData.recipientAddress && gasAmount ? 'Thanh toán thủ công:' : 'Hướng dẫn thanh toán:'}
                     </p>
                     <ol className="text-xs text-blue-700 dark:text-blue-400 space-y-1 list-decimal list-inside">
                       <li>Copy địa chỉ ví người nhận và số tiền GAS</li>
