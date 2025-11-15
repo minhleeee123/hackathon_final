@@ -10,12 +10,12 @@
 ## 📋 Mục Lục
 
 - [Tổng Quan](#-tổng-quan)
+- [Hướng Dẫn Cài Đặt](#-hướng-dẫn-cài-đặt)
+- [Chạy Ứng Dụng](#-chạy-ứng-dụng)
 - [Kiến Trúc Hệ Thống](#-kiến-trúc-hệ-thống)
 - [Tính Năng Chính](#-tính-năng-chính)
 - [Công Nghệ Sử Dụng](#-công-nghệ-sử-dụng)
 - [Hệ Thống AI Agent](#-hệ-thống-ai-agent)
-- [Hướng Dẫn Cài Đặt](#-hướng-dẫn-cài-đặt)
-- [Chạy Ứng Dụng](#-chạy-ứng-dụng)
 - [Luồng Hoạt Động](#-luồng-hoạt-động)
 - [Cấu Trúc Dự Án](#-cấu-trúc-dự-án)
 - [Cấu Hình](#-cấu-hình)
@@ -34,6 +34,121 @@ Một hệ thống quản lý email thông minh sử dụng nhiều AI agent đ�
 - **💰 Theo Dõi Tài Chính**: Phát hiện thanh toán và tích hợp ví NEO
 - **📄 Phân Tích Hợp Đồng**: Đánh giá rủi ro hợp đồng bằng AI
 - **🌓 Giao Diện Hiện Đại**: Dark/Light theme với thiết kế responsive
+
+---
+
+## 📥 Hướng Dẫn Cài Đặt
+
+### **Yêu Cầu Trước Khi Cài**
+
+- **Node.js** 18+ và npm
+- **Python** 3.11+
+- **Git**
+- **Tài Khoản Gmail** có quyền truy cập API
+- **Ví NeoLine** extension (cho tính năng crypto)
+
+### **1. Clone Repository**
+
+```bash
+git clone https://github.com/your-repo/hackathon_final.git
+cd hackathon_final
+```
+
+### **2. Cài Đặt Frontend**
+
+```bash
+cd new_frontend
+
+# Cài đặt dependencies
+npm install
+
+# Tạo credentials
+# 1. Truy cập Google Cloud Console
+# 2. Tạo OAuth 2.0 credentials
+# 3. Tải về dưới tên credentials.json
+# 4. Đặt vào thư mục new_frontend/
+```
+
+### **3. Cài Đặt Python Backend**
+
+```bash
+cd ../spoon-core
+
+# Tạo môi trường ảo
+python -m venv spoon-env
+source spoon-env/bin/activate  # Trên Windows: spoon-env\Scripts\activate
+
+# Cài đặt dependencies
+pip install -r requirements.txt
+```
+
+### **4. Cấu Hình Biến Môi Trường**
+
+Tạo file `.env` trong `spoon-core/`:
+
+```bash
+# API Keys của LLM
+OPENAI_API_KEY=sk-your-openai-key
+ANTHROPIC_API_KEY=sk-ant-your-claude-key
+GEMINI_API_KEY=your-gemini-key
+DEEPSEEK_API_KEY=your-deepseek-key
+
+# Email Backend
+BACKEND_URL=http://localhost:8000
+
+# Ví NEO (tùy chọn)
+NEO_NETWORK=TestNet
+```
+
+---
+
+## 🚀 Chạy Ứng Dụng
+
+### **Khởi Động Tất Cả Dịch Vụ** (Cần 3 terminal)
+
+#### **Terminal 1: Gmail API Server**
+
+```bash
+cd new_frontend
+node gmail-api-server.cjs
+```
+
+Chạy trên `http://localhost:3002`
+
+#### **Terminal 2: Python AI Backend**
+
+```bash
+cd spoon-core
+source spoon-env/bin/activate
+python email_backend/app.py
+```
+
+Chạy trên `http://localhost:8000`
+
+#### **Terminal 3: Frontend Dev Server**
+
+```bash
+cd new_frontend
+npm run dev
+```
+
+Chạy trên `http://localhost:5173`
+
+### **Xác Thực Gmail Lần Đầu**
+
+1. Mở `http://localhost:5173`
+2. Bật "Use Real Data" ở header
+3. Trình duyệt sẽ mở để xác thực Gmail OAuth
+4. Cấp quyền
+5. Token được lưu vào `token.json`
+
+### **Truy Cập Ứng Dụng**
+
+Mở trình duyệt: `http://localhost:5173`
+
+**Giao diện mặc định**: Chế độ cá nhân với dữ liệu mock
+**Chuyển sang dữ liệu thật**: Bật toggle switch ở header
+**Chế độ doanh nghiệp**: Click nút chuyển đổi tài khoản
 
 ---
 
@@ -312,121 +427,6 @@ Hệ thống sử dụng **5 AI agent chuyên biệt**, mỗi agent có vai trò
 - **Temperature**: 0.4 (phân tích cân bằng)
 - **Kiến Thức Chuyên Ngành**: Thuật ngữ pháp lý, mẫu hợp đồng
 - **Chấm Điểm Rủi Ro**: Thuật toán trọng số dựa trên mức độ nghiêm trọng của điều khoản
-
----
-
-## 📥 Hướng Dẫn Cài Đặt
-
-### **Yêu Cầu Trước Khi Cài**
-
-- **Node.js** 18+ và npm
-- **Python** 3.11+
-- **Git**
-- **Tài Khoản Gmail** có quyền truy cập API
-- **Ví NeoLine** extension (cho tính năng crypto)
-
-### **1. Clone Repository**
-
-```bash
-git clone https://github.com/your-repo/hackathon_final.git
-cd hackathon_final
-```
-
-### **2. Cài Đặt Frontend**
-
-```bash
-cd new_frontend
-
-# Cài đặt dependencies
-npm install
-
-# Tạo credentials
-# 1. Truy cập Google Cloud Console
-# 2. Tạo OAuth 2.0 credentials
-# 3. Tải về dưới tên credentials.json
-# 4. Đặt vào thư mục new_frontend/
-```
-
-### **3. Cài Đặt Python Backend**
-
-```bash
-cd ../spoon-core
-
-# Tạo môi trường ảo
-python -m venv spoon-env
-source spoon-env/bin/activate  # Trên Windows: spoon-env\Scripts\activate
-
-# Cài đặt dependencies
-pip install -r requirements.txt
-```
-
-### **4. Cấu Hình Biến Môi Trường**
-
-Tạo file `.env` trong `spoon-core/`:
-
-```bash
-# API Keys của LLM
-OPENAI_API_KEY=sk-your-openai-key
-ANTHROPIC_API_KEY=sk-ant-your-claude-key
-GEMINI_API_KEY=your-gemini-key
-DEEPSEEK_API_KEY=your-deepseek-key
-
-# Email Backend
-BACKEND_URL=http://localhost:8000
-
-# Ví NEO (tùy chọn)
-NEO_NETWORK=TestNet
-```
-
----
-
-## 🚀 Chạy Ứng Dụng
-
-### **Khởi Động Tất Cả Dịch Vụ** (Cần 3 terminal)
-
-#### **Terminal 1: Gmail API Server**
-
-```bash
-cd new_frontend
-node gmail-api-server.cjs
-```
-
-Chạy trên `http://localhost:3002`
-
-#### **Terminal 2: Python AI Backend**
-
-```bash
-cd spoon-core
-source spoon-env/bin/activate
-python email_backend/app.py
-```
-
-Chạy trên `http://localhost:8000`
-
-#### **Terminal 3: Frontend Dev Server**
-
-```bash
-cd new_frontend
-npm run dev
-```
-
-Chạy trên `http://localhost:5173`
-
-### **Xác Thực Gmail Lần Đầu**
-
-1. Mở `http://localhost:5173`
-2. Bật "Use Real Data" ở header
-3. Trình duyệt sẽ mở để xác thực Gmail OAuth
-4. Cấp quyền
-5. Token được lưu vào `token.json`
-
-### **Truy Cập Ứng Dụng**
-
-Mở trình duyệt: `http://localhost:5173`
-
-**Giao diện mặc định**: Chế độ cá nhân với dữ liệu mock
-**Chuyển sang dữ liệu thật**: Bật toggle switch ở header
-**Chế độ doanh nghiệp**: Click nút chuyển đổi tài khoản
 
 ---
 

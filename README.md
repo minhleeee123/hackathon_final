@@ -37,6 +37,121 @@ An intelligent email management system that leverages multiple AI agents to auto
 
 ---
 
+## 📥 Installation Guide
+
+### **Prerequisites**
+
+- **Node.js** 18+ and npm
+- **Python** 3.11+
+- **Git**
+- **Gmail Account** with API access
+- **NeoLine Wallet** extension (for crypto features)
+
+### **1. Clone Repository**
+
+```bash
+git clone https://github.com/your-repo/hackathon_final.git
+cd hackathon_final
+```
+
+### **2. Setup Frontend**
+
+```bash
+cd new_frontend
+
+# Install dependencies
+npm install
+
+# Create credentials
+# 1. Go to Google Cloud Console
+# 2. Create OAuth 2.0 credentials
+# 3. Download as credentials.json
+# 4. Place in new_frontend/ folder
+```
+
+### **3. Setup Python Backend**
+
+```bash
+cd ../spoon-core
+
+# Create virtual environment
+python -m venv spoon-env
+source spoon-env/bin/activate  # On Windows: spoon-env\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+### **4. Configure Environment Variables**
+
+Create `.env` file in `spoon-core/`:
+
+```bash
+# LLM API Keys
+OPENAI_API_KEY=sk-your-openai-key
+ANTHROPIC_API_KEY=sk-ant-your-claude-key
+GEMINI_API_KEY=your-gemini-key
+DEEPSEEK_API_KEY=your-deepseek-key
+
+# Email Backend
+BACKEND_URL=http://localhost:8000
+
+# NEO Wallet (optional)
+NEO_NETWORK=TestNet
+```
+
+---
+
+## 🚀 Running the Application
+
+### **Start All Services** (3 terminals required)
+
+#### **Terminal 1: Gmail API Server**
+
+```bash
+cd new_frontend
+node gmail-api-server.cjs
+```
+
+This starts on `http://localhost:3002`
+
+#### **Terminal 2: Python AI Backend**
+
+```bash
+cd spoon-core
+source spoon-env/bin/activate
+python email_backend/app.py
+```
+
+This starts on `http://localhost:8000`
+
+#### **Terminal 3: Frontend Dev Server**
+
+```bash
+cd new_frontend
+npm run dev
+```
+
+This starts on `http://localhost:5173`
+
+### **First-Time Gmail Authentication**
+
+1. Open `http://localhost:5173`
+2. Toggle "Use Real Data" in header
+3. Browser will open for Gmail OAuth
+4. Grant permissions
+5. Token saved to `token.json`
+
+### **Access the Application**
+
+Open browser: `http://localhost:5173`
+
+**Default view**: Personal mode with mock data
+**Switch to real data**: Toggle switch in header
+**Business mode**: Click account toggle button
+
+---
+
 ## 🏗️ System Architecture
 
 ```
@@ -311,121 +426,6 @@ The system employs **5 specialized AI agents**, each with a specific role:
 - **Temperature**: 0.4 (balanced analysis)
 - **Domain Knowledge**: Legal terminology, contract patterns
 - **Risk Scoring**: Weighted algorithm based on clause severity
-
----
-
-## 📥 Installation Guide
-
-### **Prerequisites**
-
-- **Node.js** 18+ and npm
-- **Python** 3.11+
-- **Git**
-- **Gmail Account** with API access
-- **NeoLine Wallet** extension (for crypto features)
-
-### **1. Clone Repository**
-
-```bash
-git clone https://github.com/your-repo/hackathon_final.git
-cd hackathon_final
-```
-
-### **2. Setup Frontend**
-
-```bash
-cd new_frontend
-
-# Install dependencies
-npm install
-
-# Create credentials
-# 1. Go to Google Cloud Console
-# 2. Create OAuth 2.0 credentials
-# 3. Download as credentials.json
-# 4. Place in new_frontend/ folder
-```
-
-### **3. Setup Python Backend**
-
-```bash
-cd ../spoon-core
-
-# Create virtual environment
-python -m venv spoon-env
-source spoon-env/bin/activate  # On Windows: spoon-env\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-```
-
-### **4. Configure Environment Variables**
-
-Create `.env` file in `spoon-core/`:
-
-```bash
-# LLM API Keys
-OPENAI_API_KEY=sk-your-openai-key
-ANTHROPIC_API_KEY=sk-ant-your-claude-key
-GEMINI_API_KEY=your-gemini-key
-DEEPSEEK_API_KEY=your-deepseek-key
-
-# Email Backend
-BACKEND_URL=http://localhost:8000
-
-# NEO Wallet (optional)
-NEO_NETWORK=TestNet
-```
-
----
-
-## 🚀 Running the Application
-
-### **Start All Services** (3 terminals required)
-
-#### **Terminal 1: Gmail API Server**
-
-```bash
-cd new_frontend
-node gmail-api-server.cjs
-```
-
-This starts on `http://localhost:3002`
-
-#### **Terminal 2: Python AI Backend**
-
-```bash
-cd spoon-core
-source spoon-env/bin/activate
-python email_backend/app.py
-```
-
-This starts on `http://localhost:8000`
-
-#### **Terminal 3: Frontend Dev Server**
-
-```bash
-cd new_frontend
-npm run dev
-```
-
-This starts on `http://localhost:5173`
-
-### **First-Time Gmail Authentication**
-
-1. Open `http://localhost:5173`
-2. Toggle "Use Real Data" in header
-3. Browser will open for Gmail OAuth
-4. Grant permissions
-5. Token saved to `token.json`
-
-### **Access the Application**
-
-Open browser: `http://localhost:5173`
-
-**Default view**: Personal mode with mock data
-**Switch to real data**: Toggle switch in header
-**Business mode**: Click account toggle button
 
 ---
 
