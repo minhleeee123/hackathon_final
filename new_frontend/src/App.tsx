@@ -728,14 +728,14 @@ function App() {
 
   const handleClassificationComplete = async (results: BulkClassificationResult[]) => {
     try {
-      // For mock data, just show labels immediately without processing
+      // For mock data, labels are already shown via classifiedEmailIds in handleBulkClassify
+      // This function should only be called for real data
       if (!useRealData) {
-        setMockLabelsVisible(true);
-        setSelectedEmails(new Set());
+        console.warn('handleClassificationComplete should not be called for mock data');
         return;
       }
 
-      // Real data processing
+      // Real data processing - apply labels via Gmail API
       // Helper to find label ID by name
       const findLabelId = (labelName: string): string | null => {
         const label = gmailLabels.find(l => l.name === labelName);
@@ -748,8 +748,15 @@ function App() {
 
       // Apply labels to each successfully classified email
       for (const result of results) {
+        console.log('🔍 Checking result:', { 
+          emailId: result.emailId, 
+          success: result.success, 
+          hasClassification: !!result.classification,
+          fullResult: result 
+        });
+        
         if (result.success && result.classification) {
-          console.log(`Email ${result.emailId} classification:`, {
+          console.log(`✅ Email ${result.emailId} classification:`, {
             category: result.classification.category,
             gmailLabel: result.classification.gmailLabel,
             hasTask: result.classification.hasTask,

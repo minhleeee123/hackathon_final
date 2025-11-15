@@ -46,12 +46,26 @@ export async function classifyEmail(email: Email) {
 export async function classifyEmailsBulk(
   emails: Email[],
   onProgress?: (current: number, total: number, emailId: string) => void
-) {
+): Promise<BulkClassificationResult[]> {
   // Process emails one by one (backend doesn't have bulk endpoint yet)
-  const results = [];
+  const results: BulkClassificationResult[] = [];
   for (let i = 0; i < emails.length; i++) {
-    const result = await BackendService.classifyEmail(emails[i]);
-    results.push(result);
+    try {
+      const classification = await BackendService.classifyEmail(emails[i]);
+      results.push({
+        emailId: emails[i].id,
+        classification: classification,
+        success: true
+      });
+    } catch (error) {
+      console.error(`Failed to classify email ${emails[i].id}:`, error);
+      results.push({
+        emailId: emails[i].id,
+        classification: null,
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
     if (onProgress) {
       onProgress(i + 1, emails.length, emails[i].id);
     }

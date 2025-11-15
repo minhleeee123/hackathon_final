@@ -1336,8 +1336,8 @@ export const mockBusinessLabels: GmailLabel[] = [
     name: 'Human Resources',
     type: 'user',
     color: {
-      backgroundColor: '#e07798',
-      textColor: '#ffffff'
+      backgroundColor: '#f7a7c0',
+      textColor: '#000000'
     }
   },
   {
@@ -1345,7 +1345,7 @@ export const mockBusinessLabels: GmailLabel[] = [
     name: 'Technology',
     type: 'user',
     color: {
-      backgroundColor: '#42d692',
+      backgroundColor: '#16a766',
       textColor: '#ffffff'
     }
   },
@@ -1354,7 +1354,7 @@ export const mockBusinessLabels: GmailLabel[] = [
     name: 'Finance',
     type: 'user',
     color: {
-      backgroundColor: '#fad165',
+      backgroundColor: '#f2c960',
       textColor: '#000000'
     }
   },
@@ -1363,8 +1363,8 @@ export const mockBusinessLabels: GmailLabel[] = [
     name: 'Marketing',
     type: 'user',
     color: {
-      backgroundColor: '#a479e2',
-      textColor: '#ffffff'
+      backgroundColor: '#a4c2f4',
+      textColor: '#000000'
     }
   },
   {
@@ -1372,8 +1372,8 @@ export const mockBusinessLabels: GmailLabel[] = [
     name: 'Customer Support',
     type: 'user',
     color: {
-      backgroundColor: '#f691b3',
-      textColor: '#ffffff'
+      backgroundColor: '#fbc8d9',
+      textColor: '#000000'
     }
   },
 
@@ -1383,7 +1383,7 @@ export const mockBusinessLabels: GmailLabel[] = [
     name: 'URGENT',
     type: 'user',
     color: {
-      backgroundColor: '#ff0000',
+      backgroundColor: '#cc3a21',
       textColor: '#ffffff'
     }
   },
@@ -1392,7 +1392,7 @@ export const mockBusinessLabels: GmailLabel[] = [
     name: 'CRITICAL',
     type: 'user',
     color: {
-      backgroundColor: '#ff6600',
+      backgroundColor: '#e66550',
       textColor: '#ffffff'
     }
   },
@@ -1403,7 +1403,7 @@ export const mockBusinessLabels: GmailLabel[] = [
     name: 'Invoice',
     type: 'user',
     color: {
-      backgroundColor: '#16a765',
+      backgroundColor: '#16a766',
       textColor: '#ffffff'
     }
   },
@@ -1412,7 +1412,7 @@ export const mockBusinessLabels: GmailLabel[] = [
     name: 'Needs Approval',
     type: 'user',
     color: {
-      backgroundColor: '#ffc107',
+      backgroundColor: '#ffbc6b',
       textColor: '#000000'
     }
   },
@@ -1421,7 +1421,7 @@ export const mockBusinessLabels: GmailLabel[] = [
     name: 'Support Ticket',
     type: 'user',
     color: {
-      backgroundColor: '#9c27b0',
+      backgroundColor: '#8e63ce',
       textColor: '#ffffff'
     }
   },
@@ -1430,7 +1430,7 @@ export const mockBusinessLabels: GmailLabel[] = [
     name: 'Code Review',
     type: 'user',
     color: {
-      backgroundColor: '#00bcd4',
+      backgroundColor: '#6d9eeb',
       textColor: '#ffffff'
     }
   },
@@ -1439,7 +1439,7 @@ export const mockBusinessLabels: GmailLabel[] = [
     name: 'Reports',
     type: 'user',
     color: {
-      backgroundColor: '#607d8b',
+      backgroundColor: '#999999',
       textColor: '#ffffff'
     }
   },
@@ -1448,8 +1448,8 @@ export const mockBusinessLabels: GmailLabel[] = [
     name: 'Announcement',
     type: 'user',
     color: {
-      backgroundColor: '#ff9800',
-      textColor: '#ffffff'
+      backgroundColor: '#ffad47',
+      textColor: '#000000'
     }
   },
   {
@@ -1457,7 +1457,7 @@ export const mockBusinessLabels: GmailLabel[] = [
     name: 'Meeting',
     type: 'user',
     color: {
-      backgroundColor: '#795548',
+      backgroundColor: '#a46a21',
       textColor: '#ffffff'
     }
   },
@@ -1466,7 +1466,7 @@ export const mockBusinessLabels: GmailLabel[] = [
     name: 'Project',
     type: 'user',
     color: {
-      backgroundColor: '#3f51b5',
+      backgroundColor: '#285bac',
       textColor: '#ffffff'
     }
   },
@@ -1475,7 +1475,7 @@ export const mockBusinessLabels: GmailLabel[] = [
     name: 'Recruitment',
     type: 'user',
     color: {
-      backgroundColor: '#e91e63',
+      backgroundColor: '#e07798',
       textColor: '#ffffff'
     }
   },
@@ -1484,7 +1484,7 @@ export const mockBusinessLabels: GmailLabel[] = [
     name: 'Campaign',
     type: 'user',
     color: {
-      backgroundColor: '#cddc39',
+      backgroundColor: '#fce8b3',
       textColor: '#000000'
     }
   }

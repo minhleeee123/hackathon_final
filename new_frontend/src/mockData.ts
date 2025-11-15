@@ -751,8 +751,8 @@ export const mockGmailLabels: GmailLabel[] = [
     name: 'Người thân & Gia đình',
     type: 'user',
     color: {
-      backgroundColor: '#e07798',
-      textColor: '#ffffff'
+      backgroundColor: '#f7a7c0',
+      textColor: '#000000'
     }
   },
   {
@@ -760,7 +760,7 @@ export const mockGmailLabels: GmailLabel[] = [
     name: 'Bạn bè',
     type: 'user',
     color: {
-      backgroundColor: '#42d692',
+      backgroundColor: '#16a766',
       textColor: '#ffffff'
     }
   },
@@ -769,7 +769,7 @@ export const mockGmailLabels: GmailLabel[] = [
     name: 'Tài chính',
     type: 'user',
     color: {
-      backgroundColor: '#fad165',
+      backgroundColor: '#f2c960',
       textColor: '#000000'
     }
   },
