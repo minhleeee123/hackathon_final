@@ -1,3 +1,71 @@
+<div align="center">
+  
+  #  AI Email Management System
+  
+  <p align="center">
+    <img src="https://img.shields.io/badge/React-18.3-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React"/>
+    <img src="https://img.shields.io/badge/Python-3.11+-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python"/>
+    <img src="https://img.shields.io/badge/TypeScript-5.0-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript"/>
+    <img src="https://img.shields.io/badge/FastAPI-0.104-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI"/>
+  </p>
+
+  <h3> Intelligent Email Processing & Task Management with Multi-Agent AI System</h3>
+  
+  <p>
+    <strong>Powered by Spoon OS Core Framework & Modern Web Technologies</strong>
+  </p>
+
+  <p align="center">
+    <img src="https://img.shields.io/badge/OpenAI-GPT--4-412991?style=flat-square&logo=openai&logoColor=white" alt="OpenAI"/>
+    <img src="https://img.shields.io/badge/Claude-Sonnet--4-8B5CF6?style=flat-square" alt="Claude"/>
+    <img src="https://img.shields.io/badge/Gemini-2.0-4285F4?style=flat-square&logo=google&logoColor=white" alt="Gemini"/>
+    <img src="https://img.shields.io/badge/NEO-Blockchain-00E599?style=flat-square" alt="NEO"/>
+  </p>
+
+  <p align="center">
+    <a href="#-installation-guide">Installation</a> •
+    <a href="#-running-the-application">Quick Start</a> •
+    <a href="#-system-architecture">Architecture</a> •
+    <a href="#-ai-agent-system">AI Agents</a> •
+    <a href="#-core-features">Features</a>
+  </p>
+
+  <br/>
+
+  <table>
+    <tr>
+      <td align="center" width="200px">
+        <b> Email Management</b><br/>
+        <sub>Auto-classify & organize</sub>
+      </td>
+      <td align="center" width="200px">
+        <b> Task Extraction</b><br/>
+        <sub>AI-powered task detection</sub>
+      </td>
+      <td align="center" width="200px">
+        <b> Finance Tracking</b><br/>
+        <sub>Payment & crypto wallet</sub>
+      </td>
+      <td align="center" width="200px">
+        <b> Contract Analysis</b><br/>
+        <sub>Risk assessment & insights</sub>
+      </td>
+    </tr>
+  </table>
+
+  <br/>
+
+  <img src="https://img.shields.io/badge/Status-Active-success?style=for-the-badge" alt="Status"/>
+  <img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge" alt="License"/>
+  <img src="https://img.shields.io/badge/Hackathon-2025-orange?style=for-the-badge" alt="Hackathon"/>
+
+</div>
+
+<br/>
+
+---
+
+
 #  AI Email Management System - Hackathon Project
 
 <div align="center">
