@@ -11,6 +11,7 @@ import Header from './components/Header';
 import TaskManagementPage from './components/TaskManagementPage';
 import FinanceManagementPage from './components/FinanceManagementPage';
 import ContractAnalyzer from './components/ContractAnalyzer';
+import SettingsModal from './components/SettingsModal';
 import { useTheme } from './components/ThemeProvider';
 import { 
   fetchGmailEmails, 
@@ -57,6 +58,7 @@ function App() {
   // Task Management state
   const [currentTab, setCurrentTab] = useState<'emails' | 'tasks' | 'finance' | 'contracts'>('emails');
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isExtractingTasks, setIsExtractingTasks] = useState(false);
   const [taskExtractionProgress, setTaskExtractionProgress] = useState({ current: 0, total: 0 });
 
@@ -821,6 +823,7 @@ function App() {
         isLoading={isLoading}
         accountMode={accountMode}
         onToggleAccountMode={handleToggleAccountMode}
+        onOpenSettings={() => setIsSettingsOpen(true)}
       />
 
       {/* Tab Navigation */}
@@ -969,6 +972,16 @@ function App() {
             isAnalyzing={isAnalyzingContracts}
             analysisProgress={contractAnalysisProgress}
           />
+        ) : currentTab === 'system-analyzer' ? (
+          <SystemAnalyzer />
+        ) : currentTab === 'contracts' ? (
+          <ContractAnalyzer
+            emails={emails}
+            isAnalyzing={isAnalyzingContracts}
+            onStartAnalysis={handleStartContractAnalysis}
+            analysisProgress={contractAnalysisProgress}
+            hasAnalyzed={contractsAnalyzed}
+          />
         ) : (
           <FinanceManagementPage
             payments={payments}
@@ -1000,6 +1013,13 @@ function App() {
           gmailLabels={gmailLabels}
           onCreateLabel={handleCreateLabel}
           onDeleteLabel={handleDeleteLabel}
+        />
+      )}
+
+      {isSettingsOpen && (
+        <SettingsModal
+          isOpen={isSettingsOpen}
+          onClose={() => setIsSettingsOpen(false)}
         />
       )}
     </div>

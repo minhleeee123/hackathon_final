@@ -179,3 +179,61 @@ export async function checkBackendHealth(): Promise<boolean> {
     return false;
   }
 }
+
+// ==================== Agent 5: System Analyzer ====================
+
+export interface EmailPattern {
+  category: string;
+  frequency: number;
+  commonSenders: string[];
+  description?: string;
+}
+
+export interface UserProfile {
+  name: string;
+  email: string;
+  role: string;
+  occupation?: string;
+  industry?: string;
+  workingHours?: string;
+  emailPatterns: EmailPattern[];
+  painPoints: string[];
+  goals: string[];
+  additionalInfo?: string;
+}
+
+export interface AgentSuggestion {
+  agentId: string;
+  name: string;
+  description: string;
+  purpose: string;
+  useCases: string[];
+  features: string[];
+  estimatedImpact: string;
+  priority: number;
+  reasoning: string;
+}
+
+export interface SystemAnalysisResult {
+  currentAgents: string[];
+  suggestedAgents: AgentSuggestion[];
+  workflowRecommendations: string[];
+  overallAssessment: string;
+  reasoning: string;
+}
+
+export async function analyzeProfile(profile: UserProfile): Promise<SystemAnalysisResult> {
+  const response = await fetch(`${BACKEND_URL}/api/analyze-profile`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(profile)
+  });
+
+  if (!response.ok) {
+    throw new Error(`Profile analysis API error: ${response.status}`);
+  }
+
+  return await response.json();
+}

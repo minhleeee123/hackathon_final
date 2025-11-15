@@ -22,7 +22,7 @@ app = FastAPI(title="Email Backend API", version="1.0.0")
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],
+    allow_origins=["http://localhost:5173", "http://localhost:3000", "http://localhost:3001"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -421,6 +421,161 @@ JSON format:
             paymentMethod=None,
             description=request.body[:100]
         )
+
+# ==================== Agent 5: System Analyzer ====================
+
+class EmailPattern(BaseModel):
+    category: str  # work, family, friends, finance, shopping, travel, health, education, other
+    frequency: int  # emails per week
+    commonSenders: List[str] = []
+    description: Optional[str] = None
+
+class UserProfileRequest(BaseModel):
+    name: str
+    email: str
+    role: str  # employee, manager, freelancer, business_owner, student, other
+    occupation: Optional[str] = None
+    industry: Optional[str] = None
+    workingHours: Optional[str] = None
+    emailPatterns: List[EmailPattern]
+    painPoints: List[str]
+    goals: List[str]
+    additionalInfo: Optional[str] = None
+
+class AgentSuggestion(BaseModel):
+    agentId: str
+    name: str
+    description: str
+    purpose: str
+    useCases: List[str]
+    features: List[str]
+    estimatedImpact: str  # high, medium, low
+    priority: int  # 1 = highest
+    reasoning: str
+
+class SystemAnalysisResponse(BaseModel):
+    currentAgents: List[str]
+    suggestedAgents: List[AgentSuggestion]
+    workflowRecommendations: List[str]
+    overallAssessment: str
+    reasoning: str
+
+@app.post("/api/analyze-profile", response_model=SystemAnalysisResponse)
+async def analyze_profile(request: UserProfileRequest):
+    """Agent 5: Analyze user profile and suggest additional agents"""
+    
+    # Build detailed prompt for analysis
+    email_patterns_str = "\n".join([
+        f"  - {p.category}: ~{p.frequency} emails/tuần"
+        + (f" ({p.description})" if p.description else "")
+        + (f"\n    Người gửi: {', '.join(p.commonSenders)}" if p.commonSenders else "")
+        for p in request.emailPatterns
+    ])
+    
+    pain_points_str = "\n".join([f"  - {p}" for p in request.painPoints])
+    goals_str = "\n".join([f"  - {g}" for g in request.goals])
+    
+    prompt = f"""Analyze this user's email usage profile and suggest additional AI agents to help them.
+
+USER PROFILE:
+Name: {request.name}
+Email: {request.email}
+Role: {request.role}
+Occupation: {request.occupation or 'Not specified'}
+Industry: {request.industry or 'Not specified'}
+Working Hours: {request.workingHours or 'Not specified'}
+
+EMAIL PATTERNS:
+{email_patterns_str}
+
+PAIN POINTS (Khó khăn hiện tại):
+{pain_points_str}
+
+GOALS (Mục tiêu mong muốn):
+{goals_str}
+
+ADDITIONAL INFO:
+{request.additionalInfo or 'None'}
+
+CURRENT AGENTS:
+1. Email Classifier - Phân loại email (Work/Family/Friends/Finance/Spam/Promotion)
+2. Task Extractor - Trích xuất tasks từ email
+3. Reply Generator - Tạo email trả lời tự động
+4. Payment Extractor - Trích xuất thông tin thanh toán
+
+YOUR TASK:
+Based on the user's profile, email patterns, pain points, and goals, suggest 3-5 additional AI agents that would be most helpful.
+
+For each suggested agent, provide:
+1. agentId: unique identifier (lowercase-with-dashes)
+2. name: Vietnamese name
+3. description: Short description (1-2 sentences)
+4. purpose: Main purpose
+5. useCases: 3-5 specific use cases (list)
+6. features: 3-5 key features (list)
+7. estimatedImpact: "high", "medium", or "low"
+8. priority: 1-5 (1 = highest priority)
+9. reasoning: Why this agent is recommended for this user
+
+Also provide:
+- workflowRecommendations: 3-5 suggestions to improve their email workflow
+- overallAssessment: Overall assessment of their current setup and needs
+- reasoning: Why you made these specific recommendations
+
+Respond ONLY with valid JSON in this format:
+{{
+  "currentAgents": ["Email Classifier", "Task Extractor", "Reply Generator", "Payment Extractor"],
+  "suggestedAgents": [
+    {{
+      "agentId": "email-scheduler",
+      "name": "Email Scheduler",
+      "description": "Tự động lên lịch gửi email vào thời điểm phù hợp",
+      "purpose": "Tối ưu thời gian gửi email để tăng tỷ lệ phản hồi",
+      "useCases": ["Gửi email vào giờ làm việc của người nhận", "..."],
+      "features": ["Phân tích múi giờ", "Smart scheduling", "..."],
+      "estimatedImpact": "high",
+      "priority": 1,
+      "reasoning": "User nhận nhiều email công việc và cần quản lý thời gian tốt hơn"
+    }}
+  ],
+  "workflowRecommendations": ["Sử dụng labels để tổ chức email tốt hơn", "..."],
+  "overallAssessment": "User có workflow cơ bản tốt nhưng cần tools để xử lý khối lượng email lớn",
+  "reasoning": "Dựa trên việc user nhận ~50 emails/tuần về công việc và goals là tự động hóa"
+}}"""
+
+    try:
+        # Call LLM
+        response_content = await call_llm(prompt, provider="gemini")
+        
+        # Parse JSON from response
+        import json
+        import re
+        
+        # Extract JSON from response
+        json_match = re.search(r'\{[\s\S]*\}', response_content)
+        if not json_match:
+            raise ValueError("No JSON found in LLM response")
+        
+        result = json.loads(json_match.group(0))
+        
+        # Validate and structure response
+        return SystemAnalysisResponse(
+            currentAgents=result.get("currentAgents", []),
+            suggestedAgents=[
+                AgentSuggestion(**agent) for agent in result.get("suggestedAgents", [])
+            ],
+            workflowRecommendations=result.get("workflowRecommendations", []),
+            overallAssessment=result.get("overallAssessment", ""),
+            reasoning=result.get("reasoning", "")
+        )
+        
+    except json.JSONDecodeError as e:
+        print(f"JSON parsing error: {e}")
+        print(f"Response content: {response_content}")
+        raise HTTPException(status_code=500, detail=f"Failed to parse LLM response: {str(e)}")
+    except Exception as e:
+        print(f"Analysis error: {e}")
+        raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
 
 # ==================== Run Server ====================
 

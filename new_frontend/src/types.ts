@@ -157,3 +157,48 @@ export interface Contract {
   riskAnalysis: RiskAnalysis;
   attachments: Attachment[];
 }
+
+// ==================== User Profile & Agent Analysis Types ====================
+
+export type EmailCategory = 'work' | 'family' | 'friends' | 'finance' | 'shopping' | 'travel' | 'health' | 'education' | 'other';
+export type UserRole = 'employee' | 'manager' | 'freelancer' | 'business_owner' | 'student' | 'other';
+
+export interface EmailPattern {
+  category: EmailCategory;
+  frequency: number; // emails per week
+  commonSenders: string[];
+  description?: string;
+}
+
+export interface UserProfile {
+  name: string;
+  email: string;
+  role: UserRole;
+  occupation?: string; // Nghề nghiệp cụ thể
+  industry?: string; // Ngành nghề
+  workingHours?: string; // VD: "9-17" hoặc "Linh hoạt"
+  emailPatterns: EmailPattern[]; // Các loại email thường nhận
+  painPoints: string[]; // Khó khăn hiện tại với email
+  goals: string[]; // Mục tiêu muốn đạt được
+  additionalInfo?: string; // Thông tin thêm
+}
+
+export interface AgentSuggestion {
+  agentId: string;
+  name: string;
+  description: string;
+  purpose: string; // Mục đích chính
+  useCases: string[]; // Các tình huống sử dụng
+  features: string[]; // Tính năng chính
+  estimatedImpact: 'high' | 'medium' | 'low'; // Tác động dự kiến
+  priority: number; // 1 = highest priority
+  reasoning: string; // Lý do đề xuất agent này
+}
+
+export interface SystemAnalysisResult {
+  currentAgents: string[]; // Các agent hiện có
+  suggestedAgents: AgentSuggestion[];
+  workflowRecommendations: string[]; // Đề xuất cải thiện workflow
+  overallAssessment: string; // Đánh giá tổng quan
+  reasoning: string; // Lý do phân tích
+}

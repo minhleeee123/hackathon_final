@@ -1,124 +1,146 @@
 /**
- * Unified AI Service with Backend Fallback
- * Tries backend first, falls back to direct Gemini API if backend is down
+ * Unified AI Service - Backend Only
+ * Routes all AI operations through Python backend with Spoon OS
  */
 
 import * as BackendService from './backendService';
-import * as DirectAIService from './aiService';
-import * as DirectTaskService from './taskExtractorService';
-import * as DirectReplyService from './replyGeneratorService';
 import type { Email } from './backendService';
 
-let backendAvailable = true;
-let lastHealthCheck = 0;
-const HEALTH_CHECK_INTERVAL = 30000; // 30 seconds
+// Re-export constants from original services for backward compatibility
+export const CATEGORY_LABELS = {
+  'Work': 'Công việc',
+  'Family': 'Người thân & Gia đình',
+  'Friends': 'Bạn bè',
+  'Finance': 'Tài chính',
+  'Spam': 'Spam & Quảng cáo',
+  'Promotion': 'Spam & Quảng cáo'
+} as const;
 
-// ==================== Health Check ====================
+export const TASK_LABEL = 'Task for Agent 2';
 
-async function checkBackend(): Promise<boolean> {
-  const now = Date.now();
-  if (now - lastHealthCheck < HEALTH_CHECK_INTERVAL) {
-    return backendAvailable;
+export const REPLY_STYLES = {
+  professional: {
+    name: 'Chuyên nghiệp',
+    description: 'Trang trọng, lịch sự, phù hợp công việc'
+  },
+  friendly: {
+    name: 'Thân thiện',
+    description: 'Gần gũi, ấm áp nhưng vẫn lịch sự'
+  },
+  casual: {
+    name: 'Thoải mái',
+    description: 'Thân mật, dễ chịu với bạn bè'
+  },
+  formal: {
+    name: 'Trang trọng',
+    description: 'Rất lịch sự, trang trọng cho quan hệ quan trọng'
   }
-
-  lastHealthCheck = now;
-  backendAvailable = await BackendService.checkBackendHealth();
-  
-  if (backendAvailable) {
-    console.log('✅ Backend is available - using Spoon OS');
-  } else {
-    console.warn('⚠️ Backend unavailable - using direct Gemini API');
-  }
-  
-  return backendAvailable;
-}
+} as const;
 
 // ==================== Classification ====================
 
 export async function classifyEmail(email: Email) {
-  if (await checkBackend()) {
-    try {
-      return await BackendService.classifyEmail(email);
-    } catch (error) {
-      console.error('Backend classification failed, falling back to direct API:', error);
-      backendAvailable = false;
-    }
-  }
-  
-  // Fallback to direct API
-  return await DirectAIService.classifyEmail(email);
+  return await BackendService.classifyEmail(email);
 }
 
 export async function classifyEmailsBulk(
   emails: Email[],
-  onProgress?: (current: number, total: number, emailId: string) => void,
-  useFastMode: boolean = false
+  onProgress?: (current: number, total: number, emailId: string) => void
 ) {
-  // For bulk operations, use direct API (no backend endpoint yet)
-  return await DirectAIService.classifyEmailsBulk(emails, onProgress, useFastMode);
+  // Process emails one by one (backend doesn't have bulk endpoint yet)
+  const results = [];
+  for (let i = 0; i < emails.length; i++) {
+    const result = await BackendService.classifyEmail(emails[i]);
+    results.push(result);
+    if (onProgress) {
+      onProgress(i + 1, emails.length, emails[i].id);
+    }
+  }
+  return results;
 }
 
 // ==================== Task Extraction ====================
 
 export async function extractTasksFromEmail(email: Email) {
-  if (await checkBackend()) {
-    try {
-      return await BackendService.extractTasksFromEmail(email);
-    } catch (error) {
-      console.error('Backend task extraction failed, falling back to direct API:', error);
-      backendAvailable = false;
-    }
-  }
-  
-  // Fallback to direct API
-  return await DirectTaskService.extractTasksFromEmail(email);
+  return await BackendService.extractTasksFromEmail(email);
 }
 
 export async function extractTasksBulk(
   emails: Email[],
   onProgress?: (current: number, total: number) => void
 ) {
-  // For bulk operations, use direct API (no backend endpoint yet)
-  return await DirectTaskService.extractTasksBulk(emails, onProgress);
+  // Process emails one by one (backend doesn't have bulk endpoint yet)
+  const results = [];
+  for (let i = 0; i < emails.length; i++) {
+    const result = await BackendService.extractTasksFromEmail(emails[i]);
+    results.push(result);
+    if (onProgress) {
+      onProgress(i + 1, emails.length);
+    }
+  }
+  return results;
 }
 
 // ==================== Reply Generation ====================
 
 export async function generateReply(request: BackendService.GenerateReplyRequest) {
-  if (await checkBackend()) {
-    try {
-      return await BackendService.generateReply(request);
-    } catch (error) {
-      console.error('Backend reply generation failed, falling back to direct API:', error);
-      backendAvailable = false;
-    }
-  }
-  
-  // Fallback to direct API
-  return await DirectReplyService.generateReply(request);
+  return await BackendService.generateReply(request);
 }
 
 // ==================== Payment Extraction ====================
 
 export async function extractPaymentInfo(email: Email) {
-  if (await checkBackend()) {
-    try {
-      return await BackendService.extractPaymentInfo(email);
-    } catch (error) {
-      console.error('Backend payment extraction failed, falling back to direct API:', error);
-      backendAvailable = false;
-    }
-  }
-  
-  // Fallback to direct API
-  return await DirectAIService.extractPaymentInfo(email);
+  return await BackendService.extractPaymentInfo(email);
 }
 
 // ==================== Utility ====================
 
-export function getClassificationSummary(results: any[]) {
-  return DirectAIService.getClassificationSummary(results);
+export interface BulkClassificationResult {
+  emailId: string;
+  classification: any;
+  success: boolean;
+  error?: string;
 }
 
-export { CATEGORY_LABELS, TASK_LABEL } from './aiService';
-export { REPLY_STYLES } from './replyGeneratorService';
+export function getClassificationSummary(results: BulkClassificationResult[]) {
+  const summary = {
+    total: results.length,
+    successful: results.filter(r => r.success).length,
+    failed: results.filter(r => !r.success).length,
+    byCategory: {} as Record<string, number>,
+    withTasks: 0,
+    spamDetected: 0
+  };
+
+  results.forEach(result => {
+    if (result.success && result.classification) {
+      const category = result.classification.category;
+      summary.byCategory[category] = (summary.byCategory[category] || 0) + 1;
+      
+      if (result.classification.hasTask) {
+        summary.withTasks++;
+      }
+      
+      if (result.classification.isSpam) {
+        summary.spamDetected++;
+      }
+    }
+  });
+
+  return summary;
+}
+
+// ==================== Agent 5: System Analyzer ====================
+
+export async function analyzeProfile(profile: BackendService.UserProfile) {
+  return await BackendService.analyzeProfile(profile);
+}
+
+// Re-export types for convenience
+export type { 
+  UserProfile, 
+  EmailPattern, 
+  SystemAnalysisResult, 
+  AgentSuggestion 
+} from './backendService';
+

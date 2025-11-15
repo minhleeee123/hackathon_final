@@ -1,6 +1,7 @@
-import { Search, Menu, Settings, RefreshCw, Moon, Sun, User, Building2, Mail } from 'lucide-react';
+import { Search, Menu, Settings, RefreshCw, Moon, Sun, User, Building2, Mail, ChevronDown } from 'lucide-react';
 import { useTheme } from './ThemeProvider';
 import { AccountMode } from '../types';
+import { useState, useRef, useEffect } from 'react';
 
 interface HeaderProps {
   searchQuery: string;
@@ -12,6 +13,7 @@ interface HeaderProps {
   isLoading?: boolean;
   accountMode?: AccountMode;
   onToggleAccountMode?: () => void;
+  onOpenSettings?: () => void;
 }
 
 export default function Header({ 
@@ -23,9 +25,24 @@ export default function Header({
   onRefreshData,
   isLoading = false,
   accountMode = 'personal',
-  onToggleAccountMode
+  onToggleAccountMode,
+  onOpenSettings
 }: HeaderProps) {
   const { theme, toggleTheme } = useTheme();
+  const [showSettingsMenu, setShowSettingsMenu] = useState(false);
+  const settingsRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (settingsRef.current && !settingsRef.current.contains(event.target as Node)) {
+        setShowSettingsMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
   
   return (
     <header 
@@ -112,20 +129,72 @@ export default function Header({
             )}
           </button>
         )}
-        <button 
-          onClick={toggleTheme}
-          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
-          title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-        >
-          {theme === 'dark' ? (
-            <Sun className="w-6 h-6 text-yellow-400" />
-          ) : (
-            <Moon className="w-6 h-6 text-gray-600" />
+        
+        {/* Settings Dropdown */}
+        <div className="relative" ref={settingsRef}>
+          <button 
+            onClick={() => setShowSettingsMenu(!showSettingsMenu)}
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
+            title="Settings"
+          >
+            <Settings className="w-6 h-6 text-gray-600 dark:text-gray-400" />
+          </button>
+
+          {showSettingsMenu && (
+            <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-2 z-50">
+              <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+                <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">Cài đặt</p>
+              </div>
+              
+              <button
+                onClick={() => {
+                  setShowSettingsMenu(false);
+                  if (onOpenSettings) onOpenSettings();
+                }}
+                className="w-full px-4 py-2.5 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-3"
+              >
+                <User className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                <div>
+                  <p className="text-sm font-medium text-gray-800 dark:text-gray-200">Thông tin người dùng</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Phân tích & đề xuất AI agents</p>
+                </div>
+              </button>
+
+              <button
+                onClick={() => {
+                  setShowSettingsMenu(false);
+                  toggleTheme();
+                }}
+                className="w-full px-4 py-2.5 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-3"
+              >
+                {theme === 'dark' ? (
+                  <>
+                    <Sun className="w-4 h-4 text-yellow-400" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-800 dark:text-gray-200">Chế độ sáng</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Chuyển sang giao diện sáng</p>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <Moon className="w-4 h-4 text-gray-600" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-800 dark:text-gray-200">Chế độ tối</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Chuyển sang giao diện tối</p>
+                    </div>
+                  </>
+                )}
+              </button>
+
+              <div className="border-t border-gray-200 dark:border-gray-700 mt-2 pt-2">
+                <div className="px-4 py-2">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">Version 1.0.0</p>
+                </div>
+              </div>
+            </div>
           )}
-        </button>
-        <button className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors">
-          <Settings className="w-6 h-6 text-gray-600 dark:text-gray-400" />
-        </button>
+        </div>
+
         <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-medium cursor-pointer hover:bg-blue-700">
           M
         </div>
