@@ -25,9 +25,11 @@ import {
   removeLabelFromEmail as gmailRemoveLabel,
   createLabel as gmailCreateLabel,
   deleteLabel as gmailDeleteLabel,
-  initializeAILabels
+  initializeAILabels,
+  findOrCreateLabel,
+  addLabelsToEmailByNames
 } from './services/gmailService';
-import { BulkClassificationResult, TASK_LABEL, classifyEmailsBulk } from './services/unifiedAIService';
+import { BulkClassificationResult, TASK_LABEL, classifyEmailsBulk, mapToUserLabel } from './services/unifiedAIService';
 import { extractTasksBulk, TaskExtractionResult } from './services/unifiedAIService';
 import { 
   connectNeoLineWallet, 
@@ -736,14 +738,6 @@ function App() {
       }
 
       // Real data processing - apply labels via Gmail API
-      // Helper to find label ID by name
-      const findLabelId = (labelName: string): string | null => {
-        const label = gmailLabels.find(l => l.name === labelName);
-        console.log(`Finding label "${labelName}":`, label ? `Found ID=${label.id}` : 'NOT FOUND');
-        return label?.id || null;
-      };
-
-      console.log('Available labels:', gmailLabels.map(l => ({ id: l.id, name: l.name })));
       console.log('Classification results:', results);
 
       // Apply labels to each successfully classified email
@@ -763,33 +757,33 @@ function App() {
             needsTaskLabel: result.classification.needsTaskLabel
           });
 
-          const labelIds: string[] = [];
+          const labelNames: string[] = [];
           
-          // Add main category label
+          // Add main category label - map system label to user label
           if (result.classification.gmailLabel) {
-            const labelId = findLabelId(result.classification.gmailLabel);
-            if (labelId) {
-              console.log(`  -> Adding category label: ${result.classification.gmailLabel} (${labelId})`);
-              labelIds.push(labelId);
-            }
+            const userLabelName = mapToUserLabel(result.classification.gmailLabel);
+            console.log(`  -> Mapping "${result.classification.gmailLabel}" → "${userLabelName}"`);
+            labelNames.push(userLabelName);
           }
           
           // Add task label if email contains task
           if (result.classification.needsTaskLabel) {
-            const taskLabelId = findLabelId(TASK_LABEL);
-            if (taskLabelId) {
-              console.log(`  -> Adding task label: ${TASK_LABEL} (${taskLabelId})`);
-              labelIds.push(taskLabelId);
-            }
+            console.log(`  -> Adding task label: ${TASK_LABEL}`);
+            labelNames.push(TASK_LABEL);
           }
           
-          console.log(`  -> Total labels to apply:`, labelIds);
+          console.log(`  -> Total labels to apply:`, labelNames);
           
-          // Apply labels
-          if (labelIds.length > 0) {
-            await handleAddLabel(result.emailId, labelIds);
+          // Apply labels by name (auto find or create)
+          if (labelNames.length > 0) {
+            try {
+              await addLabelsToEmailByNames(result.emailId, labelNames);
+              console.log(`✅ Applied ${labelNames.length} labels to email ${result.emailId}`);
+            } catch (error) {
+              console.error(`Failed to apply labels to email ${result.emailId}:`, error);
+            }
           } else {
-            console.warn(`No labels found for email ${result.emailId}`);
+            console.warn(`No labels to apply for email ${result.emailId}`);
           }
         }
       }

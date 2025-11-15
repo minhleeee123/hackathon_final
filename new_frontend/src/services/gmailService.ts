@@ -195,3 +195,68 @@ export async function initializeAILabels(): Promise<{
     throw error;
   }
 }
+
+/**
+ * Find or create label by name
+ * Tìm label theo tên, nếu chưa có thì tạo mới (không cần màu)
+ */
+export async function findOrCreateLabel(labelName: string): Promise<string> {
+  try {
+    // Get all existing labels
+    const labelsData = await fetchGmailLabels();
+    
+    // Find label by name (case-insensitive)
+    const existingLabel = labelsData.labels.find(
+      l => l.name.toLowerCase() === labelName.toLowerCase()
+    );
+    
+    if (existingLabel) {
+      console.log(`✅ Label "${labelName}" already exists: ${existingLabel.id}`);
+      return existingLabel.id;
+    }
+    
+    // Label doesn't exist, create it without color (use Gmail default)
+    console.log(`📝 Creating new label: "${labelName}"`);
+    const newLabel = await createLabel(labelName); // No color parameter
+    console.log(`✅ Label created: ${newLabel.id}`);
+    return newLabel.id;
+  } catch (error) {
+    console.error(`Error finding/creating label "${labelName}":`, error);
+    throw error;
+  }
+}
+
+/**
+ * Add label to email by label name (not ID)
+ * Tự động tìm hoặc tạo label nếu chưa có
+ */
+export async function addLabelToEmailByName(emailId: string, labelName: string): Promise<void> {
+  try {
+    const labelId = await findOrCreateLabel(labelName);
+    await addLabelToEmail(emailId, labelId);
+    console.log(`✅ Added label "${labelName}" to email ${emailId}`);
+  } catch (error) {
+    console.error(`Error adding label "${labelName}" to email:`, error);
+    throw error;
+  }
+}
+
+/**
+ * Add multiple labels to email by names
+ */
+export async function addLabelsToEmailByNames(emailId: string, labelNames: string[]): Promise<void> {
+  try {
+    const labelIds: string[] = [];
+    
+    for (const labelName of labelNames) {
+      const labelId = await findOrCreateLabel(labelName);
+      labelIds.push(labelId);
+    }
+    
+    await addLabelToEmail(emailId, labelIds);
+    console.log(`✅ Added ${labelIds.length} labels to email ${emailId}`);
+  } catch (error) {
+    console.error('Error adding labels to email:', error);
+    throw error;
+  }
+}

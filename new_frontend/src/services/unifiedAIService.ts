@@ -18,6 +18,28 @@ export const CATEGORY_LABELS = {
 
 export const TASK_LABEL = 'Task for Agent 2';
 
+// Mapping Gmail system categories to user-friendly labels
+export const GMAIL_CATEGORY_TO_USER_LABEL: Record<string, string> = {
+  'CATEGORY_PROMOTIONS': 'Spam & Quảng cáo',
+  'CATEGORY_SOCIAL': 'Bạn bè',
+  'CATEGORY_UPDATES': 'Thông báo',
+  'CATEGORY_FORUMS': 'Diễn đàn',
+  'CATEGORY_PERSONAL': 'Cá nhân',
+  'Work': 'Công việc',
+  'Family': 'Người thân & Gia đình',
+  'Friends': 'Bạn bè',
+  'Finance': 'Tài chính',
+  'Spam': 'Spam & Quảng cáo',
+  'Promotion': 'Spam & Quảng cáo'
+};
+
+/**
+ * Convert Gmail system label or category to user-friendly label name
+ */
+export function mapToUserLabel(gmailLabel: string): string {
+  return GMAIL_CATEGORY_TO_USER_LABEL[gmailLabel] || gmailLabel;
+}
+
 export const REPLY_STYLES = {
   professional: {
     name: 'Chuyên nghiệp',
