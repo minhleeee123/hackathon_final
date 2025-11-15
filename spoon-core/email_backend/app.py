@@ -50,6 +50,7 @@ class EmailClassifyResponse(BaseModel):
 class TaskExtractRequest(BaseModel):
     subject: str
     from_email: str
+    from_name: str = ""
     body: str
 
 class Task(BaseModel):
@@ -205,10 +206,12 @@ JSON: {{"category":"","hasTask":false,"reasoning":""}}"""
 async def extract_tasks(request: TaskExtractRequest):
     """Extract actionable tasks from email"""
     
+    from_name = request.from_name or request.from_email
+    
     prompt = f"""You are a Task Extraction AI. Analyze this email and extract actionable tasks.
 
 Email:
-From: {request.from_email}
+From: {from_name} <{request.from_email}>
 Subject: {request.subject}
 Body: {request.body}
 
