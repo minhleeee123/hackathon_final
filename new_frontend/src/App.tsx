@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Email, EmailFolder, GmailLabel, Task, TaskStatus, PaymentItem, AccountMode } from './types';
 import { mockEmails, mockGmailLabels } from './mockData';
 import { mockBusinessEmails, mockBusinessLabels } from './mockDataBusiness';
+import { mockNeoEmails } from './mockDataNeo';
 import Sidebar from './components/Sidebar';
 import EmailList from './components/EmailList';
 import EmailDetail from './components/EmailDetail';
@@ -31,7 +32,8 @@ import { extractTasksBulk, TaskExtractionResult } from './services/unifiedAIServ
 
 function App() {
   const { theme } = useTheme();
-  const [emails, setEmails] = useState<Email[]>(mockEmails);
+  // Combine personal mock data with NEO hackathon data
+  const [emails, setEmails] = useState<Email[]>([...mockNeoEmails, ...mockEmails]);
   const [gmailLabels, setGmailLabels] = useState<GmailLabel[]>(mockGmailLabels);
   const [selectedFolder, setSelectedFolder] = useState<EmailFolder>('inbox');
   const [selectedLabel, setSelectedLabel] = useState<string | null>(null);
@@ -148,7 +150,8 @@ function App() {
         setEmails(mockBusinessEmails);
         setGmailLabels(mockBusinessLabels);
       } else {
-        setEmails(mockEmails);
+        // Personal mode: combine NEO emails with regular mock data
+        setEmails([...mockNeoEmails, ...mockEmails]);
         setGmailLabels(mockGmailLabels);
       }
       // Reset UI state
@@ -411,6 +414,30 @@ function App() {
 
   // AI Classification handlers
   const handleBulkClassify = async () => {
+    // For mock data: just toggle label visibility (no API call)
+    if (!useRealData) {
+      setIsClassifying(true);
+      const emailsToClassify = Array.from(selectedEmails)
+        .map(id => emails.find(e => e.id === id)!)
+        .filter(Boolean);
+      
+      setClassificationProgress({ current: 0, total: emailsToClassify.length });
+      
+      // Simulate AI processing animation - update progress gradually
+      for (let i = 0; i < emailsToClassify.length; i++) {
+        await new Promise(resolve => setTimeout(resolve, 100)); // 100ms per email
+        setClassificationProgress({ current: i + 1, total: emailsToClassify.length });
+      }
+      
+      // Show labels after animation completes
+      setMockLabelsVisible(true);
+      setIsClassifying(false);
+      setClassificationProgress({ current: 0, total: 0 });
+      setSelectedEmails(new Set()); // Clear selection
+      return;
+    }
+
+    // For real data: call API for classification
     setIsClassifying(true);
     setClassificationProgress({ current: 0, total: selectedEmails.size });
 
@@ -424,7 +451,7 @@ function App() {
         (current, total) => {
           setClassificationProgress({ current, total });
         },
-        !useRealData // useFastMode for mock data
+        false // useFastMode = false for real data
       );
 
       await handleClassificationComplete(results);
@@ -811,7 +838,8 @@ function App() {
               setEmails(mockBusinessEmails);
               setGmailLabels(mockBusinessLabels);
             } else {
-              setEmails(mockEmails);
+              // Personal mode: combine NEO emails with regular mock data
+              setEmails([...mockNeoEmails, ...mockEmails]);
               setGmailLabels(mockGmailLabels);
             }
             setSelectedEmails(new Set());
