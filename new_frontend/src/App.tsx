@@ -25,8 +25,8 @@ import {
   deleteLabel as gmailDeleteLabel,
   initializeAILabels
 } from './services/gmailService';
-import { BulkClassificationResult, TASK_LABEL, classifyEmailsBulk } from './services/aiService';
-import { extractTasksBulk, TaskExtractionResult } from './services/taskExtractorService';
+import { BulkClassificationResult, TASK_LABEL, classifyEmailsBulk } from './services/unifiedAIService';
+import { extractTasksBulk, TaskExtractionResult } from './services/unifiedAIService';
 
 function App() {
   const { theme } = useTheme();

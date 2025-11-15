@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { X, Loader2, CheckCircle } from 'lucide-react';
 import { Email } from '../types';
-import { classifyEmailsBulk, getClassificationSummary, BulkClassificationResult } from '../services/aiService';
+import { classifyEmailsBulk, getClassificationSummary, BulkClassificationResult } from '../services/unifiedAIService';
 
 interface ClassificationDialogProps {
   isOpen: boolean;

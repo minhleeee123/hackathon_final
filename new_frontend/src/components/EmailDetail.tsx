@@ -6,7 +6,7 @@ import { vi } from 'date-fns/locale';
 import EmailLabelMenu from './EmailLabelMenu';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import { generateReply, REPLY_STYLES, ReplyStyle } from '../services/replyGeneratorService';
+import { generateReply, REPLY_STYLES, ReplyStyle } from '../services/unifiedAIService';
 
 interface EmailDetailProps {
   email: Email;
