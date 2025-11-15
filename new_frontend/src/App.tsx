@@ -62,6 +62,7 @@ function App() {
   const [classificationProgress, setClassificationProgress] = useState({ current: 0, total: 0 });
   const [aiLabelsInitialized, setAiLabelsInitialized] = useState(false);
   const [mockLabelsVisible, setMockLabelsVisible] = useState(false); // Track if mock labels should be shown
+  const [classifiedEmailIds, setClassifiedEmailIds] = useState<Set<string>>(new Set()); // Track which emails have been classified
   
   // Task Management state
   const [currentTab, setCurrentTab] = useState<'emails' | 'tasks' | 'finance' | 'contracts'>('emails');
@@ -180,6 +181,7 @@ function App() {
       setSelectedEmails(new Set());
       setSelectedEmailId(null);
       setMockLabelsVisible(false);
+      setClassifiedEmailIds(new Set());
     }
     // For real data, labels will be managed by Gmail API
   };
@@ -187,9 +189,12 @@ function App() {
   const selectedEmail = emails.find(e => e.id === selectedEmailId);
 
   // For mock data demo: hide labels until classification is run
-  const displayEmails = useRealData || mockLabelsVisible 
+  const displayEmails = useRealData
     ? emails 
-    : emails.map(email => ({ ...email, labels: [] }));
+    : emails.map(email => ({
+        ...email,
+        labels: mockLabelsVisible || classifiedEmailIds.has(email.id) ? email.labels : []
+      }));
 
   const filteredEmails = displayEmails.filter(email => {
     // Filter by label first
@@ -403,22 +408,34 @@ function App() {
   };
 
   const handleToggleSelect = (emailId: string) => {
+    console.log('handleToggleSelect called with emailId:', emailId);
     setSelectedEmails(prev => {
       const newSet = new Set(prev);
+      console.log('Previous selected emails:', Array.from(prev));
       if (newSet.has(emailId)) {
         newSet.delete(emailId);
+        console.log('Removing emailId from selection');
       } else {
         newSet.add(emailId);
+        console.log('Adding emailId to selection');
       }
+      console.log('New selected emails:', Array.from(newSet));
       return newSet;
     });
   };
 
   const handleSelectAll = () => {
+    console.log('handleSelectAll called');
+    console.log('Current selectedEmails.size:', selectedEmails.size);
+    console.log('filteredEmails.length:', filteredEmails.length);
     if (selectedEmails.size === filteredEmails.length) {
+      console.log('Clearing all selections');
       setSelectedEmails(new Set());
     } else {
-      setSelectedEmails(new Set(filteredEmails.map(e => e.id)));
+      console.log('Selecting all filtered emails');
+      const allIds = filteredEmails.map(e => e.id);
+      console.log('All IDs to select:', allIds);
+      setSelectedEmails(new Set(allIds));
     }
   };
 
@@ -482,8 +499,12 @@ function App() {
         setClassificationProgress({ current: i + 1, total: emailsToClassify.length });
       }
       
-      // Show labels after animation completes
-      setMockLabelsVisible(true);
+      // Show labels after animation completes - only for classified emails
+      setClassifiedEmailIds(prev => {
+        const newSet = new Set(prev);
+        emailsToClassify.forEach(email => newSet.add(email.id));
+        return newSet;
+      });
       setIsClassifying(false);
       setClassificationProgress({ current: 0, total: 0 });
       setSelectedEmails(new Set()); // Clear selection
@@ -520,15 +541,22 @@ function App() {
   const handleBulkExtractTasks = async () => {
     setIsExtractingTasks(true);
     
-    // Find all emails with Task label (label_task)
-    const taskLabelId = 'label_task';
-    const emailsWithTaskLabel = emails.filter(email => email.labels.includes(taskLabelId));
+    // Get only selected emails
+    const emailsToExtract = Array.from(selectedEmails)
+      .map(id => emails.find(e => e.id === id)!)
+      .filter(Boolean);
     
-    setTaskExtractionProgress({ current: 0, total: emailsWithTaskLabel.length });
+    if (emailsToExtract.length === 0) {
+      alert('❌ Vui lòng chọn ít nhất 1 email!');
+      setIsExtractingTasks(false);
+      return;
+    }
+    
+    setTaskExtractionProgress({ current: 0, total: emailsToExtract.length });
 
     try {
       const results = await extractTasksBulk(
-        emailsWithTaskLabel,
+        emailsToExtract,
         (current, total) => {
           setTaskExtractionProgress({ current, total });
         }
@@ -638,25 +666,26 @@ function App() {
   const handleBulkExtractPayments = async () => {
     setIsExtractingPayments(true);
     
-    // Find all emails with Finance label (label_finance)
-    const financeLabelId = 'label_finance';
-    const emailsWithFinanceLabel = emails.filter(email => email.labels.includes(financeLabelId));
+    // Get only selected emails
+    const emailsToExtract = Array.from(selectedEmails)
+      .map(id => emails.find(e => e.id === id)!)
+      .filter(Boolean);
     
-    if (emailsWithFinanceLabel.length === 0) {
-      alert('❌ Không có email nào có nhãn "Tài chính"!');
+    if (emailsToExtract.length === 0) {
+      alert('❌ Vui lòng chọn ít nhất 1 email!');
       setIsExtractingPayments(false);
       return;
     }
     
-    setPaymentExtractionProgress({ current: 0, total: emailsWithFinanceLabel.length });
+    setPaymentExtractionProgress({ current: 0, total: emailsToExtract.length });
 
     try {
       const { extractPaymentInfo } = await import('./services/aiService');
       let current = 0;
 
-      for (const email of emailsWithFinanceLabel) {
+      for (const email of emailsToExtract) {
         current++;
-        setPaymentExtractionProgress({ current, total: emailsWithFinanceLabel.length });
+        setPaymentExtractionProgress({ current, total: emailsToExtract.length });
 
         try {
           const paymentInfo = await extractPaymentInfo(email);
@@ -676,7 +705,7 @@ function App() {
         }
 
         // Wait 1 second between requests to avoid rate limiting
-        if (current < emailsWithFinanceLabel.length) {
+        if (current < emailsToExtract.length) {
           await new Promise(resolve => setTimeout(resolve, 1000));
         }
       }
@@ -687,7 +716,7 @@ function App() {
       // Switch to Finance tab
       setCurrentTab('finance');
       
-      alert(`Trích xuất thành công ${emailsWithFinanceLabel.length} khoản thanh toán từ email tài chính!`);
+      alert(`Trích xuất thành công ${emailsToExtract.length} khoản thanh toán từ email đã chọn!`);
     } catch (error) {
       console.error('Payment extraction failed:', error);
       alert('❌ Có lỗi xảy ra khi trích xuất payment!');
@@ -898,6 +927,7 @@ function App() {
             setSelectedEmails(new Set());
             setSelectedEmailId(null);
             setMockLabelsVisible(false); // Reset label visibility for demo
+            setClassifiedEmailIds(new Set()); // Reset classified emails
           }
         }}
         onRefreshData={loadGmailData}
