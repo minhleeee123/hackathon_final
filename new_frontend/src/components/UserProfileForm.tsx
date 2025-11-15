@@ -139,7 +139,7 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ onSubmit, initialProf
   return (
     <div className="bg-white rounded-lg shadow-lg p-6 max-w-4xl mx-auto">
       <h2 className="text-2xl font-bold mb-6 text-gray-800">
-        📋 Thông tin người dùng
+        Thông tin người dùng
       </h2>
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -240,7 +240,7 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ onSubmit, initialProf
         {/* Email Patterns */}
         <div className="border-t pt-4">
           <h3 className="text-lg font-semibold mb-3 text-gray-800">
-            📧 Loại email thường nhận
+            Loại email thường nhận
           </h3>
 
           {/* Current patterns list */}
@@ -272,7 +272,7 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ onSubmit, initialProf
                     onClick={() => handleRemovePattern(index)}
                     className="text-red-600 hover:text-red-800 ml-2"
                   >
-                    ✕
+                    ×
                   </button>
                 </div>
               ))}
@@ -356,7 +356,7 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ onSubmit, initialProf
                         onClick={() => handleRemoveSender(index)}
                         className="ml-1 text-blue-600 hover:text-blue-800"
                       >
-                        ✕
+                        ×
                       </button>
                     </span>
                   ))}
@@ -391,7 +391,7 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ onSubmit, initialProf
               onClick={handleAddPattern}
               className="w-full px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
             >
-              ➕ Thêm loại email
+              + Thêm loại email
             </button>
           </div>
         </div>
@@ -399,7 +399,7 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ onSubmit, initialProf
         {/* Pain Points */}
         <div className="border-t pt-4">
           <h3 className="text-lg font-semibold mb-3 text-gray-800">
-            ⚠️ Khó khăn hiện tại
+            Khó khăn hiện tại
           </h3>
 
           {profile.painPoints.length > 0 && (
@@ -415,7 +415,7 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ onSubmit, initialProf
                     onClick={() => handleRemovePainPoint(index)}
                     className="text-red-600 hover:text-red-800"
                   >
-                    ✕
+                    ×
                   </button>
                 </div>
               ))}
@@ -449,7 +449,7 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ onSubmit, initialProf
         {/* Goals */}
         <div className="border-t pt-4">
           <h3 className="text-lg font-semibold mb-3 text-gray-800">
-            🎯 Mục tiêu mong muốn
+            Mục tiêu mong muốn
           </h3>
 
           {profile.goals.length > 0 && (
@@ -465,7 +465,7 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ onSubmit, initialProf
                     onClick={() => handleRemoveGoal(index)}
                     className="text-red-600 hover:text-red-800"
                   >
-                    ✕
+                    ×
                   </button>
                 </div>
               ))}
@@ -499,7 +499,7 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ onSubmit, initialProf
         {/* Additional Info */}
         <div className="border-t pt-4">
           <h3 className="text-lg font-semibold mb-3 text-gray-800">
-            💭 Thông tin thêm
+            Thông tin thêm
           </h3>
           <textarea
             value={profile.additionalInfo}
@@ -516,7 +516,7 @@ const UserProfileForm: React.FC<UserProfileFormProps> = ({ onSubmit, initialProf
             type="submit"
             className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold"
           >
-            🔍 Phân tích & Đề xuất Agents
+            Phân tích & Đề xuất Agents
           </button>
         </div>
       </form>

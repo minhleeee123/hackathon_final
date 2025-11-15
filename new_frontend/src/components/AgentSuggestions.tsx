@@ -25,7 +25,7 @@ const AgentSuggestions: React.FC<AgentSuggestionsProps> = ({ analysis, onClose }
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-t-lg">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold mb-2">🤖 Phân tích hệ thống & Đề xuất Agents</h2>
+            <h2 className="text-2xl font-bold mb-2">Phân tích hệ thống & Đề xuất Agents</h2>
             <p className="text-blue-100">
               Dựa trên profile và nhu cầu của bạn, chúng tôi đề xuất các agents sau
             </p>
@@ -35,7 +35,7 @@ const AgentSuggestions: React.FC<AgentSuggestionsProps> = ({ analysis, onClose }
               onClick={onClose}
               className="text-white hover:text-gray-200 text-2xl"
             >
-              ✕
+              ×
             </button>
           )}
         </div>
@@ -44,13 +44,13 @@ const AgentSuggestions: React.FC<AgentSuggestionsProps> = ({ analysis, onClose }
       <div className="p-6 space-y-6">
         {/* Overall Assessment */}
         <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
-          <h3 className="font-semibold text-blue-900 mb-2">📊 Đánh giá tổng quan</h3>
+          <h3 className="font-semibold text-blue-900 mb-2">Đánh giá tổng quan</h3>
           <p className="text-blue-800">{analysis.overallAssessment}</p>
         </div>
 
         {/* Current Agents */}
         <div className="bg-gray-50 p-4 rounded-lg">
-          <h3 className="font-semibold text-gray-800 mb-3">✅ Agents hiện tại</h3>
+          <h3 className="font-semibold text-gray-800 mb-3">Agents hiện tại</h3>
           <div className="flex flex-wrap gap-2">
             {analysis.currentAgents.map((agent, index) => (
               <span
@@ -66,7 +66,7 @@ const AgentSuggestions: React.FC<AgentSuggestionsProps> = ({ analysis, onClose }
         {/* Suggested Agents */}
         <div>
           <h3 className="font-semibold text-gray-800 mb-4 text-lg">
-            💡 Agents được đề xuất ({analysis.suggestedAgents.length})
+            Agents được đề xuất ({analysis.suggestedAgents.length})
           </h3>
           <div className="space-y-4">
             {analysis.suggestedAgents
@@ -80,7 +80,7 @@ const AgentSuggestions: React.FC<AgentSuggestionsProps> = ({ analysis, onClose }
         {/* Workflow Recommendations */}
         <div className="bg-purple-50 border-l-4 border-purple-500 p-4 rounded">
           <h3 className="font-semibold text-purple-900 mb-3">
-            🔧 Đề xuất cải thiện workflow
+            Đề xuất cải thiện workflow
           </h3>
           <ul className="space-y-2">
             {analysis.workflowRecommendations.map((rec, index) => (
@@ -94,7 +94,7 @@ const AgentSuggestions: React.FC<AgentSuggestionsProps> = ({ analysis, onClose }
 
         {/* Reasoning */}
         <div className="bg-gray-50 p-4 rounded-lg">
-          <h3 className="font-semibold text-gray-800 mb-2">🧠 Lý do phân tích</h3>
+          <h3 className="font-semibold text-gray-800 mb-2">Lý do phân tích</h3>
           <p className="text-gray-700 text-sm">{analysis.reasoning}</p>
         </div>
       </div>
@@ -128,7 +128,7 @@ const AgentCard: React.FC<{ agent: AgentSuggestion }> = ({ agent }) => {
       {/* Purpose */}
       <div className="mb-3">
         <p className="text-sm">
-          <span className="font-medium text-gray-700">🎯 Mục đích:</span>{' '}
+          <span className="font-medium text-gray-700">Mục đích:</span>{' '}
           <span className="text-gray-600">{agent.purpose}</span>
         </p>
       </div>
@@ -137,7 +137,7 @@ const AgentCard: React.FC<{ agent: AgentSuggestion }> = ({ agent }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
         {/* Features */}
         <div>
-          <p className="text-xs font-semibold text-gray-700 mb-2">⚙️ Tính năng:</p>
+          <p className="text-xs font-semibold text-gray-700 mb-2">Tính năng:</p>
           <ul className="space-y-1">
             {agent.features.map((feature, index) => (
               <li key={index} className="text-xs text-gray-600 flex items-start">
@@ -165,7 +165,7 @@ const AgentCard: React.FC<{ agent: AgentSuggestion }> = ({ agent }) => {
       {/* Reasoning */}
       <div className="bg-gray-50 p-2 rounded text-xs">
         <p className="text-gray-600">
-          <span className="font-medium">💡 Lý do đề xuất:</span> {agent.reasoning}
+          <span className="font-medium">Lý do đề xuất:</span> {agent.reasoning}
         </p>
       </div>
     </div>

@@ -44,7 +44,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
         <div className="sticky top-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between z-10">
           <div>
             <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100">
-              🤖 Phân tích & Đề xuất AI Agents
+              Phân tích & Đề xuất AI Agents
             </h2>
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
               Nhập thông tin của bạn để hệ thống phân tích và đề xuất các AI agents phù hợp
@@ -77,7 +77,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
           {error && !loading && (
             <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6">
               <div className="flex items-start">
-                <span className="text-2xl mr-3">❌</span>
+                <span className="text-2xl mr-3">×</span>
                 <div>
                   <p className="font-semibold text-red-800 dark:text-red-300">Lỗi phân tích</p>
                   <p className="text-red-700 dark:text-red-400 text-sm">{error}</p>
@@ -104,7 +104,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
                   onClick={handleBackToForm}
                   className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 font-semibold"
                 >
-                  ← Phân tích lại
+                  « Phân tích lại
                 </button>
               </div>
             </div>
