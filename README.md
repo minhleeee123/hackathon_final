@@ -1,4 +1,4 @@
-# 🤖 AI Email Management System - Hackathon Project
+#  AI Email Management System - Hackathon Project
 
 <div align="center">
   <h3>Intelligent Email Processing & Task Management with Multi-Agent AI System</h3>
@@ -7,7 +7,7 @@
 
 ---
 
-## 📋 Table of Contents
+##  Table of Contents
 
 - [Overview](#-overview)
 - [System Architecture](#-system-architecture)
@@ -22,18 +22,18 @@
 
 ---
 
-## 🎯 Overview
+##  Overview
 
 An intelligent email management system that leverages multiple AI agents to automatically classify emails, extract tasks, generate replies, analyze contracts, and manage finances - all integrated with Gmail API and NEO blockchain wallet support.
 
 ### Key Highlights
 
-- **🤖 Multi-Agent AI System**: 5 specialized AI agents working together
-- **📧 Gmail Integration**: Real-time email processing with Gmail API
-- **✅ Smart Task Management**: Automatic task extraction with AI
-- **💰 Finance Tracking**: Payment detection and NEO wallet integration
-- **📄 Contract Analysis**: AI-powered contract risk assessment
-- **🌓 Modern UI**: Dark/Light theme with responsive design
+- **Multi-Agent AI System**: 5 specialized AI agents working together
+- **Gmail Integration**: Real-time email processing with Gmail API
+- **Smart Task Management**: Automatic task extraction with AI
+- **Finance Tracking**: Payment detection and NEO wallet integration
+- **Contract Analysis**: AI-powered contract risk assessment
+- **Modern UI**: Dark/Light theme with responsive design
 
 ---
 
@@ -102,7 +102,7 @@ NEO_NETWORK=TestNet
 
 ---
 
-## 🚀 Running the Application
+##  Running the Application
 
 ### **Start All Services** (3 terminals required)
 
@@ -132,12 +132,12 @@ cd new_frontend
 npm run dev
 ```
 
-This starts on `http://localhost:5173`
+This starts on `http://localhost:`(port in terminal)
 
 ### **First-Time Gmail Authentication**
 
-1. Open `http://localhost:5173`
-2. Toggle "Use Real Data" in header
+1. Open `http://localhost`
+2. Toggle "Use Real Data" in header(click touge mock)
 3. Browser will open for Gmail OAuth
 4. Grant permissions
 5. Token saved to `token.json`
@@ -200,7 +200,7 @@ Open browser: `http://localhost:5173`
 
 ---
 
-## ⚡ Core Features
+##  Core Features
 
 ### 1. 📧 **Intelligent Email Management**
 
@@ -210,7 +210,7 @@ Open browser: `http://localhost:5173`
 - **Bulk Operations**: Process multiple emails simultaneously
 - **Search & Filter**: Advanced email filtering by labels, folders, and keywords
 
-### 2. ✅ **Smart Task Management**
+### 2.  **Smart Task Management**
 
 - **AI Task Extraction**: Automatically detect and extract tasks from emails
 - **Structured Task Data**:
@@ -221,7 +221,7 @@ Open browser: `http://localhost:5173`
 - **Email Linking**: Direct link back to source email
 - **Manual Creation**: Add custom tasks outside of email context
 
-### 3. 💰 **Finance Management**
+### 3.  **Finance Management**
 
 - **Payment Detection**: AI extracts payment information from bills/invoices
 - **NEO Wallet Integration**:
@@ -234,7 +234,7 @@ Open browser: `http://localhost:5173`
   - Payment status (paid/unpaid)
 - **Crypto Payment Support**: Pay bills directly with NEO blockchain
 
-### 4. 📄 **Contract Analyzer** (Business Mode)
+### 4.  **Contract Analyzer** (Business Mode)
 
 - **AI-Powered Analysis**:
   - Risk level assessment (High/Medium/Low)
@@ -245,7 +245,7 @@ Open browser: `http://localhost:5173`
   - Duration, deadline, status
 - **Visual Dashboard**: Risk scores and recommendations
 
-### 5. 🎨 **Modern User Experience**
+### 5.  **Modern User Experience**
 
 - **Dual Theme**: Dark/Light mode with smooth transitions
 - **Responsive Design**: Works on desktop and mobile
@@ -255,7 +255,7 @@ Open browser: `http://localhost:5173`
 
 ---
 
-## 🛠️ Technology Stack
+##  Technology Stack
 
 ### **Frontend**
 
@@ -298,11 +298,11 @@ Google OAuth 2.0  - Authentication
 
 ---
 
-## 🤖 AI Agent System
+##  AI Agent System
 
 The system employs **5 specialized AI agents**, each with a specific role:
 
-### **Agent 1: Email Classifier** 🏷️
+### **Agent 1: Email Classifier** 
 
 **Purpose**: Categorize incoming emails into predefined categories
 
@@ -324,7 +324,7 @@ The system employs **5 specialized AI agents**, each with a specific role:
 - **Prompt Engineering**: Few-shot learning with examples
 - **Context**: Sender reputation, subject keywords, body sentiment
 
-### **Agent 2: Task Extractor** 📝
+### **Agent 2: Task Extractor** 
 
 **Purpose**: Extract actionable tasks from email content
 
@@ -429,7 +429,7 @@ The system employs **5 specialized AI agents**, each with a specific role:
 
 ---
 
-## 🔄 System Workflow
+##  System Workflow
 
 ### **Email Classification Flow**
 
@@ -591,7 +591,7 @@ const SCOPES = [
 
 ---
 
-## 🎯 Usage Examples
+##  Usage Examples
 
 ### **Example 1: Classify Emails**
 
@@ -632,7 +632,7 @@ const SCOPES = [
 
 ---
 
-## 🔐 Security Considerations
+##  Security Considerations
 
 - **Gmail OAuth**: Uses official Google OAuth 2.0 flow
 - **API Keys**: Stored in `.env`, never committed to git
@@ -676,7 +676,7 @@ DEFAULT_LLM_PROVIDER=anthropic  # or gemini, deepseek
 
 ---
 
-## 📊 Performance Metrics
+##  Performance Metrics
 
 - **Email Classification**: ~2-3 seconds per email
 - **Task Extraction**: ~3-5 seconds per email
@@ -686,7 +686,7 @@ DEFAULT_LLM_PROVIDER=anthropic  # or gemini, deepseek
 
 ---
 
-## 🚀 Future Enhancements
+##  Future Enhancements
 
 - [ ] Support for email attachments (PDF, DOCX)
 - [ ] Multi-language email support
@@ -700,19 +700,19 @@ DEFAULT_LLM_PROVIDER=anthropic  # or gemini, deepseek
 
 ---
 
-## 👥 Contributors
+##  Contributors
 
 Developed for AI Hackathon 2025
 
 ---
 
-## 📄 License
+##  License
 
 This project is developed for hackathon purposes.
 
 ---
 
-## 🙏 Acknowledgments
+##  Acknowledgments
 
 - **Spoon OS**: AI agent framework
 - **Gmail API**: Email integration
