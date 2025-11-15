@@ -6,7 +6,7 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 import { Plus, Search, Filter, DollarSign, TrendingUp } from 'lucide-react';
-import { PaymentItem, PaymentStatus, PaymentSource } from '../types';
+import { PaymentItem, PaymentStatus, PaymentSource, WalletState } from '../types';
 import PaymentDialog from './PaymentDialog';
 import PaymentColumn from './PaymentColumn';
 import { toast } from 'sonner';
@@ -17,6 +17,8 @@ interface FinanceManagementPageProps {
   onUpdatePayment: (payment: PaymentItem) => void;
   onDeletePayment: (paymentId: string) => void;
   onCreatePayment: (payment: Omit<PaymentItem, 'id' | 'createdAt' | 'source'>) => void;
+  walletState?: WalletState;
+  onConnectWallet?: () => void;
 }
 
 export default function FinanceManagementPage({
@@ -24,7 +26,9 @@ export default function FinanceManagementPage({
   emails = [],
   onUpdatePayment,
   onDeletePayment,
-  onCreatePayment
+  onCreatePayment,
+  walletState,
+  onConnectWallet
 }: FinanceManagementPageProps) {
   const [selectedPayment, setSelectedPayment] = useState<PaymentItem | null>(null);
   const [isCreating, setIsCreating] = useState(false);
@@ -207,6 +211,8 @@ export default function FinanceManagementPage({
               onCreate={handleCreatePayment}
               onUpdate={handleUpdatePayment}
               onDelete={handleDeletePayment}
+              walletState={walletState}
+              onConnectWallet={onConnectWallet}
             />
           )}
         </div>

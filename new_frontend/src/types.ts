@@ -108,13 +108,43 @@ export interface PaymentItem {
   currency: string; // Đơn vị tiền tệ (VND, USD, etc.)
   dueDate?: string; // Hạn thanh toán
   recipient?: string; // Người nhận/Đơn vị thu
+  recipientAddress?: string; // Địa chỉ ví NEO của người nhận
   paymentMethod?: string; // Phương thức thanh toán
   description: string; // Mô tả chi tiết
   status: PaymentStatus;
   source: PaymentSource;
   emailId?: string;
   paidAt?: string; // Thời điểm thanh toán
+  transactionHash?: string; // NEO transaction hash nếu thanh toán bằng crypto
   createdAt: string;
+}
+
+// ==================== NEO Wallet Types ====================
+
+export type NeoNetwork = 'MainNet' | 'TestNet' | 'N3MainNet' | 'N3TestNet';
+
+export interface WalletBalance {
+  NEO: string;
+  GAS: string;
+}
+
+export interface WalletState {
+  isConnected: boolean;
+  address: string | null;
+  network: NeoNetwork | null;
+  balance: WalletBalance | null;
+}
+
+export interface PaymentTransaction {
+  paymentId: string;
+  txHash: string;
+  amount: number;
+  currency: 'GAS' | 'NEO' | 'USDT';
+  fromAddress: string;
+  toAddress: string;
+  status: 'pending' | 'confirmed' | 'failed';
+  timestamp: number;
+  explorerUrl?: string;
 }
 
 // Contract Analyzer Types

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Email, EmailFolder, GmailLabel, Task, TaskStatus, PaymentItem, AccountMode } from './types';
+import { Email, EmailFolder, GmailLabel, Task, TaskStatus, PaymentItem, AccountMode, WalletState } from './types';
 import { mockEmails, mockGmailLabels } from './mockData';
 import { mockBusinessEmails, mockBusinessLabels } from './mockDataBusiness';
 import { mockNeoEmails } from './mockDataNeo';
@@ -29,6 +29,12 @@ import {
 } from './services/gmailService';
 import { BulkClassificationResult, TASK_LABEL, classifyEmailsBulk } from './services/unifiedAIService';
 import { extractTasksBulk, TaskExtractionResult } from './services/unifiedAIService';
+import { 
+  connectNeoLineWallet, 
+  disconnectWallet, 
+  restoreWalletState, 
+  isNeoLineInstalled 
+} from './services/walletService';
 
 function App() {
   const { theme } = useTheme();
@@ -73,6 +79,22 @@ function App() {
   const [contractsAnalyzed, setContractsAnalyzed] = useState(false);
   const [isAnalyzingContracts, setIsAnalyzingContracts] = useState(false);
   const [contractAnalysisProgress, setContractAnalysisProgress] = useState({ current: 0, total: 0 });
+
+  // NEO Wallet state
+  const [walletState, setWalletState] = useState<WalletState>({
+    isConnected: false,
+    address: null,
+    network: null,
+    balance: null
+  });
+
+  // Restore wallet state on mount
+  useEffect(() => {
+    const restored = restoreWalletState();
+    if (restored) {
+      setWalletState(restored);
+    }
+  }, []);
 
   // Removed auto-load effect - only load when user explicitly toggles to real data
   
@@ -266,6 +288,37 @@ function App() {
       email.id === emailId ? { ...email, folder: 'all' } : email
     ));
     setSelectedEmailId(null);
+  };
+
+  // NEO Wallet handlers
+  const handleConnectWallet = async () => {
+    if (!isNeoLineInstalled()) {
+      alert('NeoLine wallet chưa được cài đặt.\n\nVui lòng cài đặt NeoLine extension từ:\n- Chrome Web Store\n- Firefox Add-ons');
+      window.open('https://neoline.io/', '_blank');
+      return;
+    }
+
+    try {
+      const connected = await connectNeoLineWallet();
+      setWalletState(connected);
+      alert(`Kết nối thành công!\n\nĐịa chỉ: ${connected.address}\nMạng: ${connected.network}`);
+    } catch (error: any) {
+      console.error('Wallet connection error:', error);
+      alert(`Lỗi kết nối ví: ${error.message}`);
+    }
+  };
+
+  const handleDisconnectWallet = () => {
+    if (confirm('Bạn có chắc chắn muốn ngắt kết nối ví NEO?')) {
+      disconnectWallet();
+      setWalletState({
+        isConnected: false,
+        address: null,
+        network: null,
+        balance: null
+      });
+      alert('Đã ngắt kết nối ví NEO');
+    }
   };
 
   const handleSendEmail = async (emailData: Partial<Email>) => {
@@ -852,6 +905,9 @@ function App() {
         accountMode={accountMode}
         onToggleAccountMode={handleToggleAccountMode}
         onOpenSettings={() => setIsSettingsOpen(true)}
+        walletState={walletState}
+        onConnectWallet={handleConnectWallet}
+        onDisconnectWallet={handleDisconnectWallet}
       />
 
       {/* Tab Navigation */}
@@ -1017,6 +1073,8 @@ function App() {
             onUpdatePayment={handleUpdatePayment}
             onDeletePayment={handleDeletePayment}
             onCreatePayment={handleCreatePayment}
+            walletState={walletState}
+            onConnectWallet={handleConnectWallet}
           />
         )}
       </div>

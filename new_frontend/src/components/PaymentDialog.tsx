@@ -5,7 +5,9 @@ import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
 import { Label } from './ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
-import { PaymentItem, PaymentStatus } from '../types';
+import { PaymentItem, PaymentStatus, WalletState } from '../types';
+import { Wallet, Copy, ExternalLink, Check } from 'lucide-react';
+import { convertUsdToGas, copyToClipboard, getExplorerUrl } from '../services/walletService';
 
 interface PaymentDialogProps {
   payment?: PaymentItem;
@@ -14,6 +16,8 @@ interface PaymentDialogProps {
   onCreate?: (payment: Omit<PaymentItem, 'id' | 'createdAt' | 'source'>) => void;
   onUpdate?: (payment: PaymentItem) => void;
   onDelete?: (paymentId: string) => void;
+  walletState?: WalletState;
+  onConnectWallet?: () => void;
 }
 
 export default function PaymentDialog({
@@ -22,7 +26,9 @@ export default function PaymentDialog({
   onOpenChange,
   onCreate,
   onUpdate,
-  onDelete
+  onDelete,
+  walletState,
+  onConnectWallet
 }: PaymentDialogProps) {
   const [formData, setFormData] = useState({
     title: '',
@@ -30,10 +36,15 @@ export default function PaymentDialog({
     currency: 'VND',
     dueDate: '',
     recipient: '',
+    recipientAddress: '',
     paymentMethod: '',
     description: '',
-    status: 'unpaid' as PaymentStatus
+    status: 'unpaid' as PaymentStatus,
+    transactionHash: ''
   });
+
+  const [showCryptoPayment, setShowCryptoPayment] = useState(false);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
 
   useEffect(() => {
     if (payment) {
@@ -43,10 +54,16 @@ export default function PaymentDialog({
         currency: payment.currency,
         dueDate: payment.dueDate || '',
         recipient: payment.recipient || '',
+        recipientAddress: payment.recipientAddress || '',
         paymentMethod: payment.paymentMethod || '',
         description: payment.description,
-        status: payment.status
+        status: payment.status,
+        transactionHash: payment.transactionHash || ''
       });
+      // Auto show crypto payment if has recipient address or transaction
+      if (payment.recipientAddress || payment.transactionHash) {
+        setShowCryptoPayment(true);
+      }
     } else {
       setFormData({
         title: '',
@@ -54,10 +71,13 @@ export default function PaymentDialog({
         currency: 'VND',
         dueDate: '',
         recipient: '',
+        recipientAddress: '',
         paymentMethod: '',
         description: '',
-        status: 'unpaid'
+        status: 'unpaid',
+        transactionHash: ''
       });
+      setShowCryptoPayment(false);
     }
   }, [payment]);
 
@@ -70,9 +90,11 @@ export default function PaymentDialog({
       currency: formData.currency,
       dueDate: formData.dueDate || undefined,
       recipient: formData.recipient || undefined,
+      recipientAddress: formData.recipientAddress || undefined,
       paymentMethod: formData.paymentMethod || undefined,
       description: formData.description,
       status: formData.status,
+      transactionHash: formData.transactionHash || undefined,
       paidAt: formData.status === 'paid' ? new Date().toISOString() : undefined
     };
 
@@ -82,6 +104,27 @@ export default function PaymentDialog({
       onCreate(paymentData);
     }
   };
+
+  const handleCopy = async (text: string, field: string) => {
+    try {
+      await copyToClipboard(text);
+      setCopiedField(field);
+      setTimeout(() => setCopiedField(null), 2000);
+    } catch (error) {
+      alert('Không thể copy vào clipboard');
+    }
+  };
+
+  const handleMarkAsPaidWithTx = () => {
+    if (!formData.transactionHash.trim()) {
+      alert('Vui lòng nhập Transaction Hash');
+      return;
+    }
+    setFormData({ ...formData, status: 'paid' });
+  };
+
+  // Calculate GAS amount if USD
+  const gasAmount = formData.currency === 'USD' ? convertUsdToGas(parseFloat(formData.amount) || 0) : null;
 
   const handleDelete = () => {
     if (payment && onDelete) {
@@ -176,6 +219,188 @@ export default function PaymentDialog({
               placeholder="VD: Công ty Điện lực Hà Nội"
             />
           </div>
+
+          {/* NEO Crypto Payment Section */}
+          {walletState?.isConnected && formData.status === 'unpaid' && (
+            <div className="border-t pt-4 mt-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Wallet className="w-5 h-5 text-green-600" />
+                  <Label className="text-base font-semibold">Thanh toán bằng NEO/GAS</Label>
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowCryptoPayment(!showCryptoPayment)}
+                >
+                  {showCryptoPayment ? 'Ẩn' : 'Hiển thị'}
+                </Button>
+              </div>
+
+              {showCryptoPayment && (
+                <div className="space-y-3 bg-gradient-to-br from-green-50 to-blue-50 dark:from-gray-800 dark:to-gray-900 p-4 rounded-lg border border-green-200 dark:border-gray-700">
+                  {/* Recipient NEO Address */}
+                  <div>
+                    <Label htmlFor="recipientAddress" className="text-sm font-medium">
+                      Địa chỉ ví NEO người nhận
+                    </Label>
+                    <div className="flex gap-2 mt-1">
+                      <Input
+                        id="recipientAddress"
+                        value={formData.recipientAddress}
+                        onChange={(e) => setFormData({ ...formData, recipientAddress: e.target.value })}
+                        placeholder="NXXzKhVCdT7qJgNDh2tCWHHkPwcwKCKZsb"
+                        className="font-mono text-sm"
+                      />
+                      {formData.recipientAddress && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleCopy(formData.recipientAddress, 'address')}
+                        >
+                          {copiedField === 'address' ? (
+                            <Check className="w-4 h-4 text-green-600" />
+                          ) : (
+                            <Copy className="w-4 h-4" />
+                          )}
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Payment Amount in GAS */}
+                  {gasAmount && (
+                    <div className="bg-white dark:bg-gray-800 p-3 rounded border">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600 dark:text-gray-400">Số tiền cần thanh toán:</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg font-bold text-green-600">{gasAmount} GAS</span>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleCopy(gasAmount.toString(), 'amount')}
+                          >
+                            {copiedField === 'amount' ? (
+                              <Check className="w-3 h-3 text-green-600" />
+                            ) : (
+                              <Copy className="w-3 h-3" />
+                            )}
+                          </Button>
+                        </div>
+                      </div>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        ≈ ${formData.amount} USD (tỷ giá: $45/GAS)
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Instructions */}
+                  <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded p-3">
+                    <p className="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2">
+                      Hướng dẫn thanh toán:
+                    </p>
+                    <ol className="text-xs text-blue-700 dark:text-blue-400 space-y-1 list-decimal list-inside">
+                      <li>Copy địa chỉ ví người nhận và số tiền GAS</li>
+                      <li>Mở NeoLine wallet và thực hiện chuyển khoản</li>
+                      <li>Sau khi giao dịch thành công, copy Transaction Hash</li>
+                      <li>Paste Transaction Hash vào ô bên dưới và nhấn "Đánh dấu đã thanh toán"</li>
+                    </ol>
+                  </div>
+
+                  {/* Transaction Hash Input */}
+                  <div>
+                    <Label htmlFor="transactionHash" className="text-sm font-medium">
+                      Transaction Hash (sau khi thanh toán)
+                    </Label>
+                    <div className="flex gap-2 mt-1">
+                      <Input
+                        id="transactionHash"
+                        value={formData.transactionHash}
+                        onChange={(e) => setFormData({ ...formData, transactionHash: e.target.value })}
+                        placeholder="0x..."
+                        className="font-mono text-xs"
+                      />
+                      {formData.transactionHash && walletState.network && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.open(getExplorerUrl(formData.transactionHash, walletState.network!), '_blank')}
+                          title="Xem trên NEO Explorer"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Mark as Paid Button */}
+                  {formData.transactionHash && (
+                    <Button
+                      type="button"
+                      onClick={handleMarkAsPaidWithTx}
+                      className="w-full bg-green-600 hover:bg-green-700 text-white"
+                    >
+                      <Check className="w-4 h-4 mr-2" />
+                      Đánh dấu đã thanh toán
+                    </Button>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Show connect wallet button if not connected */}
+          {!walletState?.isConnected && formData.status === 'unpaid' && (
+            <div className="border-t pt-4 mt-4">
+              <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 text-center">
+                <Wallet className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                  Kết nối ví NEO để thanh toán bằng cryptocurrency
+                </p>
+                <Button
+                  type="button"
+                  onClick={onConnectWallet}
+                  variant="outline"
+                  className="gap-2"
+                >
+                  <Wallet className="w-4 h-4" />
+                  Kết nối ví NEO
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Transaction confirmed display */}
+          {formData.status === 'paid' && formData.transactionHash && (
+            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <Check className="w-5 h-5 text-green-600 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-green-800 dark:text-green-300">
+                    Đã thanh toán bằng NEO blockchain
+                  </p>
+                  <p className="text-xs text-green-700 dark:text-green-400 mt-1 font-mono break-all">
+                    TxHash: {formData.transactionHash}
+                  </p>
+                  {walletState?.network && (
+                    <Button
+                      type="button"
+                      variant="link"
+                      size="sm"
+                      className="text-green-600 hover:text-green-700 p-0 h-auto mt-1"
+                      onClick={() => window.open(getExplorerUrl(formData.transactionHash, walletState.network!), '_blank')}
+                    >
+                      Xem trên NEO Explorer →
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
 
           <div>
             <Label htmlFor="paymentMethod">Phương thức thanh toán</Label>

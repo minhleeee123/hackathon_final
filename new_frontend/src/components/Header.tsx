@@ -1,7 +1,8 @@
-import { Search, Menu, Settings, RefreshCw, Moon, Sun, User, Building2, Mail, ChevronDown } from 'lucide-react';
+import { Search, Menu, Settings, RefreshCw, Moon, Sun, User, Building2, Mail, ChevronDown, Wallet } from 'lucide-react';
 import { useTheme } from './ThemeProvider';
-import { AccountMode } from '../types';
+import { AccountMode, WalletState } from '../types';
 import { useState, useRef, useEffect } from 'react';
+import { formatAddress } from '../services/walletService';
 
 interface HeaderProps {
   searchQuery: string;
@@ -14,6 +15,9 @@ interface HeaderProps {
   accountMode?: AccountMode;
   onToggleAccountMode?: () => void;
   onOpenSettings?: () => void;
+  walletState?: WalletState;
+  onConnectWallet?: () => void;
+  onDisconnectWallet?: () => void;
 }
 
 export default function Header({ 
@@ -26,7 +30,10 @@ export default function Header({
   isLoading = false,
   accountMode = 'personal',
   onToggleAccountMode,
-  onOpenSettings
+  onOpenSettings,
+  walletState,
+  onConnectWallet,
+  onDisconnectWallet
 }: HeaderProps) {
   const { theme, toggleTheme } = useTheme();
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
@@ -159,6 +166,38 @@ export default function Header({
                   <p className="text-xs text-gray-500 dark:text-gray-400">Phân tích & đề xuất AI agents</p>
                 </div>
               </button>
+
+              {/* NEO Wallet Connection */}
+              {walletState?.isConnected ? (
+                <button
+                  onClick={() => {
+                    setShowSettingsMenu(false);
+                    if (onDisconnectWallet) onDisconnectWallet();
+                  }}
+                  className="w-full px-4 py-2.5 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-3"
+                >
+                  <Wallet className="w-4 h-4 text-green-600 dark:text-green-400" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-gray-800 dark:text-gray-200">Ví NEO đã kết nối</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{formatAddress(walletState.address)}</p>
+                  </div>
+                  <span className="text-xs text-red-600 dark:text-red-400 font-medium">Ngắt kết nối</span>
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    setShowSettingsMenu(false);
+                    if (onConnectWallet) onConnectWallet();
+                  }}
+                  className="w-full px-4 py-2.5 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-3"
+                >
+                  <Wallet className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                  <div>
+                    <p className="text-sm font-medium text-gray-800 dark:text-gray-200">Kết nối ví NEO</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">NeoLine wallet required</p>
+                  </div>
+                </button>
+              )}
 
               <button
                 onClick={() => {
